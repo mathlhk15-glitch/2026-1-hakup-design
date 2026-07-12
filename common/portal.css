@@ -1,0 +1,191 @@
+/* ============================================================
+   경일 학업설계 플랫폼 v3 — 포털 스타일
+   기반: 통합포털 t (밝은 테마 유지) + 참고: d의 카드 UI/호버/CTA
+   학교 구분색: 창원경일고=파랑(--boys), 창원경일여고=로즈(--girls)
+   ============================================================ */
+:root {
+  color-scheme: light;
+  --ink: #16212b;
+  --muted: #52606d;
+  --line: #d8dee4;
+  --paper: #f7f9fb;      /* 밝은 배경 */
+  --card: #ffffff;
+  --soft: #eef2f6;
+  --green: #176b55;
+  --green-dark: #0d4d3c;
+  --blue: #185ca8;
+  --gold: #b36b00;
+  --boys: #185ca8;       /* 창원경일고 */
+  --boys-soft: #dbeafe;
+  --girls: #c2185b;      /* 창원경일여고 */
+  --girls-soft: #fce7f3;
+  --g1: linear-gradient(135deg, #0ea5e9, #2563eb);   /* 1단계 */
+  --g2: linear-gradient(135deg, #2563eb, #7c3aed);   /* 2단계 */
+  --g3: linear-gradient(135deg, #7c3aed, #db2777);   /* 3단계 */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
+a, button { font: inherit; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+/* ── 헤더 (밝은 톤) ─────────────────────────────────────────── */
+.portal-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, .7fr);
+  gap: 40px;
+  align-items: end;
+  padding: 48px max(24px, calc((100vw - 1120px) / 2)) 42px;
+  color: var(--ink);
+  background: linear-gradient(180deg, #ffffff 0%, #eaf2f8 100%);
+  border-bottom: 4px solid #e0a126;
+}
+
+.eyebrow { margin: 0 0 6px; font-size: 13px; font-weight: 800; color: var(--blue); }
+
+h1, h2, h3, p { margin-top: 0; }
+h1 { margin-bottom: 12px; font-size: clamp(30px, 5vw, 46px); line-height: 1.2; }
+h1 .grad {
+  background: var(--g2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+h2 { margin-bottom: 8px; font-size: 25px; }
+h3 { margin-bottom: 8px; font-size: 19px; }
+.intro { max-width: 650px; margin-bottom: 0; color: var(--muted); font-size: 17px; }
+
+/* ── 학교 선택 (학교별 색 구분) ─────────────────────────────── */
+.school-picker { padding-left: 28px; border-left: 1px solid var(--line); }
+.school-picker > span { display: block; margin-bottom: 9px; font-size: 13px; font-weight: 800; }
+.segments { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.segments button {
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform .12s, box-shadow .15s;
+}
+.segments button:hover { transform: translateY(-1px); }
+.segments button[data-school="창원경일고"] { border: 2px solid var(--boys-soft); color: var(--boys); }
+.segments button[data-school="창원경일여고"] { border: 2px solid var(--girls-soft); color: var(--girls); }
+.segments button[data-school="창원경일고"].active {
+  background: var(--boys); border-color: var(--boys); color: #fff;
+  box-shadow: 0 6px 16px rgba(24, 92, 168, .35);
+}
+.segments button[data-school="창원경일여고"].active {
+  background: var(--girls); border-color: var(--girls); color: #fff;
+  box-shadow: 0 6px 16px rgba(194, 24, 91, .35);
+}
+#school-status { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+#school-status.boys { color: var(--boys); font-weight: 700; }
+#school-status.girls { color: var(--girls); font-weight: 700; }
+
+/* ── 본문 ───────────────────────────────────────────────────── */
+main { max-width: 1120px; margin: 0 auto; padding: 46px 24px 44px; }
+.section-heading { margin-bottom: 8px; }
+.section-heading .eyebrow { color: var(--green); }
+.flow-hint { margin: 0 0 22px; color: var(--muted); font-size: 13px; }
+.flow-hint b { color: var(--blue); }
+
+/* ── 단계 카드 (d의 카드 UI: 그라디언트 번호 + 호버 + CTA) ──── */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 0; padding: 0; list-style: none;
+}
+.steps li {
+  display: flex; gap: 16px; min-width: 0;
+  padding: 24px 22px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  transition: transform .16s, box-shadow .18s, border-color .16s;
+}
+.steps li:hover {
+  transform: translateY(-3px);
+  border-color: #b9cee6;
+  box-shadow: 0 10px 28px rgba(24, 92, 168, .14);
+}
+.step-number {
+  display: grid; place-items: center;
+  flex: 0 0 44px; width: 44px; height: 44px;
+  border-radius: 12px;
+  color: #fff; font-size: 19px; font-weight: 900;
+}
+.steps li:nth-child(1) .step-number { background: var(--g1); }
+.steps li:nth-child(2) .step-number { background: var(--g2); }
+.steps li:nth-child(3) .step-number { background: var(--g3); }
+.step-body { display: flex; flex-direction: column; min-width: 0; }
+.step-label { margin-bottom: 4px; color: var(--blue); font-size: 12px; font-weight: 800; }
+.step-body > p:not(.step-label):not(.step-hint) { flex: 1; color: var(--muted); font-size: 14px; }
+.step-hint { margin: 0 0 12px; color: var(--blue); font-size: 12px; }
+.step-body a, .roadmap-band a {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 10px 16px;
+  border-radius: 10px;
+  color: #fff; font-weight: 800; text-decoration: none;
+  transition: filter .15s, transform .12s;
+}
+.step-body a:hover, .roadmap-band a:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.steps li:nth-child(1) .step-body a { background: var(--g1); }
+.steps li:nth-child(2) .step-body a { background: var(--g2); }
+.steps li:nth-child(3) .step-body a { background: var(--g3); }
+
+/* ── 로드맵 밴드 / 안내 ─────────────────────────────────────── */
+.roadmap-band {
+  display: flex; justify-content: space-between; gap: 28px; align-items: center;
+  margin-top: 32px; padding: 26px 28px;
+  background: #edf4f8;
+  border-left: 5px solid var(--blue);
+  border-radius: 0 14px 14px 0;
+}
+.roadmap-band p { margin-bottom: 0; color: var(--muted); }
+.roadmap-band a { flex: 0 0 auto; background: var(--blue); }
+.notice {
+  margin-top: 26px; padding: 20px 24px;
+  background: #fff8e7; border: 1px solid #eed18f; border-radius: 12px;
+}
+.notice h2 { font-size: 17px; }
+.notice p { margin-bottom: 0; color: #5d4a20; }
+
+footer {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 22px 24px 34px;
+  color: var(--muted); font-size: 12px;
+  border-top: 1px solid var(--line);
+  text-align: center; line-height: 1.8;
+}
+
+/* ── 반응형 ─────────────────────────────────────────────────── */
+@media (max-width: 840px) {
+  .portal-header { grid-template-columns: 1fr; gap: 26px; padding-top: 32px; }
+  .school-picker { padding: 22px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+  .steps { grid-template-columns: 1fr; }
+  .roadmap-band { align-items: stretch; flex-direction: column; }
+}
+@media (max-width: 440px) {
+  main { padding: 34px 16px; }
+  .portal-header { padding-inline: 18px; }
+  .steps li { padding: 20px 18px; }
+}
+
+/* ── 인쇄 ───────────────────────────────────────────────────── */
+@media print {
+  .school-picker, .step-body a, .roadmap-band a { display: none; }
+  .portal-header { color: #000; background: #fff; border: 0; }
+  .intro { color: #333; }
+  .steps li { break-inside: avoid; box-shadow: none; }
+}

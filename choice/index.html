@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="ko" data-portal-page="choice">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>창원경일 선택과목 설계 도우미</title>
+<style>
+:root{
+  --ink:#1e293b;--ink-m:#475569;--ink-l:#94a3b8;
+  --bg:#f1f5f9;--card:#fff;--border:#e2e8f0;
+  --acc:#2563eb;--acc-l:#dbeafe;--acc-d:#1d4ed8;
+  --pri:#dc2626;--pri-l:#fee2e2;--pri-b:#fca5a5;
+  --rec:#059669;--rec-l:#d1fae5;--rec-b:#6ee7b7;
+  --ext:#d97706;--ext-l:#fef3c7;
+  --r:10px;--sh:0 2px 10px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px}
+
+/* ─── HEADER ─── */
+.hdr{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);color:#fff;padding:20px 20px 16px}
+.hdr h1{font-size:1.18rem;font-weight:800;letter-spacing:-.02em}
+.hdr .sub{font-size:.73rem;color:#94a3b8;margin-top:3px}
+
+/* ─── STEP GUIDE ─── */
+.step-guide{display:flex;gap:0;background:rgba(255,255,255,.06);border-radius:8px;margin-top:14px;overflow:hidden}
+.step{display:flex;align-items:center;gap:8px;padding:10px 14px;flex:1;position:relative}
+.step:not(:last-child)::after{content:"›";position:absolute;right:-4px;top:50%;transform:translateY(-50%);font-size:1.1rem;color:#475569;z-index:1}
+.step-num{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff;flex-shrink:0}
+.step-text{font-size:.71rem;color:#cbd5e1;line-height:1.4}
+.step-text strong{color:#fff;display:block;font-size:.73rem}
+@media(max-width:640px){.step-guide{flex-direction:column;gap:0}.step:not(:last-child)::after{display:none}.step{padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.06)}}
+
+/* ─── CAREER BAR ─── */
+.career-bar{background:#1e293b;padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:2px solid rgba(255,255,255,.06)}
+.career-bar label{font-size:.78rem;color:#94a3b8;white-space:nowrap;font-weight:600}
+.career-sel{padding:7px 12px;border:2px solid #334155;border-radius:8px;background:#0f172a;color:#e2e8f0;font-size:.82rem;font-family:inherit;outline:none;cursor:pointer;min-width:220px;transition:border-color .2s}
+.career-sel:focus{border-color:#60a5fa}
+/* legend */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:.69rem;color:#94a3b8}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.leg-dot.pri{background:var(--pri);box-shadow:0 0 0 2px #fee2e2}
+.leg-dot.rec{background:var(--rec);box-shadow:0 0 0 2px #d1fae5}
+.leg-dot.sel{background:#3b82f6}
+
+/* ─── MAIN LAYOUT ─── */
+.main{display:grid;grid-template-columns:1fr 288px;gap:14px;padding:14px 16px;max-width:1280px;margin:0 auto}
+@media(max-width:860px){.main{grid-template-columns:1fr}}
+
+/* ─── SCHEDULE ─── */
+.sched-wrap{display:flex;flex-direction:column;gap:11px}
+.sem-block{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1.5px solid var(--border);overflow:hidden}
+.sem-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;user-select:none}
+.sem-hdr .sem-right{display:flex;align-items:center;gap:8px}
+.sem-hdr .sem-sub{font-size:.7rem;font-weight:400;opacity:.8}
+.sem-hdr .sem-toggle{font-size:.8rem;opacity:.7;transition:transform .2s}
+.sem-block.collapsed .sem-toggle{transform:rotate(-90deg)}
+.sem-block.collapsed .sem-body{display:none}
+.hdr-11{background:linear-gradient(90deg,#1e40af,#3b82f6)}
+.hdr-12{background:linear-gradient(90deg,#065f46,#10b981)}
+.hdr-21{background:linear-gradient(90deg,#6d28d9,#8b5cf6)}
+.hdr-22{background:linear-gradient(90deg,#92400e,#f59e0b)}
+.hdr-31{background:linear-gradient(90deg,#0369a1,#0ea5e9)}
+.hdr-32{background:linear-gradient(90deg,#5b21b6,#a855f7)}
+.sem-body{padding:10px 12px}
+
+/* fixed row */
+.fixed-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--border)}
+.fixed-tag{padding:3px 9px;border-radius:5px;font-size:.71rem;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b;cursor:pointer;transition:all .15s}
+.fixed-tag:hover{border-color:var(--acc);color:var(--acc)}
+
+/* group */
+.grp-section{margin-bottom:9px}
+.grp-header{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.grp-code{padding:1px 7px;border-radius:4px;font-size:.66rem;font-weight:800;background:var(--acc-l);color:var(--acc)}
+.grp-label{font-size:.71rem;color:var(--ink-m)}
+.grp-counter{margin-left:auto;font-size:.69rem;padding:1px 8px;border-radius:10px;font-weight:700;transition:all .2s}
+.cnt-ok{background:#d1fae5;color:#065f46}
+.cnt-over{background:#fee2e2;color:#991b1b;animation:pulse .5s ease}
+.cnt-partial{background:#fef3c7;color:#92400e}
+.cnt-empty{background:#f1f5f9;color:#94a3b8}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+
+/* subject buttons */
+.subj-row{display:flex;flex-wrap:wrap;gap:5px}
+.subj-btn{
+  padding:5px 11px;border-radius:7px;font-size:.74rem;font-weight:500;
+  cursor:pointer;transition:all .13s;border:1.5px solid;font-family:inherit;
+  line-height:1.3;position:relative;display:flex;align-items:center;gap:4px;
+}
+.subj-btn .chk{font-size:.7rem;opacity:0;transition:opacity .15s;color:inherit}
+.subj-btn.sel .chk{opacity:1}
+.subj-btn.fixed-s{background:#f8fafc;border-color:#e2e8f0;color:#94a3b8;cursor:default;font-style:italic}
+
+/* group default colors */
+.g-A{background:#eff6ff;border-color:#bfdbfe;color:#1e40af}
+.g-B{background:#f5f3ff;border-color:#ddd6fe;color:#5b21b6}
+.g-D{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+.g-E{background:#fefce8;border-color:#fef08a;color:#854d0e}
+.g-F{background:#fff1f2;border-color:#fecdd3;color:#881337}
+.g-H{background:#f0f9ff;border-color:#bae6fd;color:#0c4a6e}
+.g-I{background:#fdf4ff;border-color:#f5d0fe;color:#4a044e}
+.g-J{background:#f0fdf4;border-color:#bbf7d0;color:#14532d}
+.g-K{background:#fefce8;border-color:#fde68a;color:#713f12}
+.g-L{background:#fff1f2;border-color:#fecdd3;color:#881337}
+
+/* selected */
+.sel.g-A{background:#bfdbfe;border-color:#2563eb;color:#1e3a8a;font-weight:700}
+.sel.g-B{background:#ddd6fe;border-color:#7c3aed;color:#3b0764;font-weight:700}
+.sel.g-D{background:#fed7aa;border-color:#ea580c;color:#7c2d12;font-weight:700}
+.sel.g-E{background:#fde68a;border-color:#ca8a04;color:#713f12;font-weight:700}
+.sel.g-F{background:#fecdd3;border-color:#e11d48;color:#881337;font-weight:700}
+.sel.g-H{background:#7dd3fc;border-color:#0284c7;color:#0c4a6e;font-weight:700}
+.sel.g-I{background:#e9d5ff;border-color:#9333ea;color:#3b0764;font-weight:700}
+.sel.g-J{background:#bbf7d0;border-color:#16a34a;color:#14532d;font-weight:700}
+.sel.g-K{background:#fde68a;border-color:#d97706;color:#713f12;font-weight:700}
+.sel.g-L{background:#fecdd3;border-color:#e11d48;color:#881337;font-weight:700}
+
+/* career highlight */
+.subj-btn.hl-pri{box-shadow:0 0 0 2.5px var(--pri),0 0 0 5px var(--pri-l)}
+.subj-btn.hl-rec{box-shadow:0 0 0 2.5px var(--rec),0 0 0 5px var(--rec-l)}
+.subj-btn:hover:not(.fixed-s){filter:brightness(.93);transform:translateY(-1px)}
+
+/* ─── SIDEBAR ─── */
+.sidebar{display:flex;flex-direction:column;gap:11px;position:sticky;top:14px;height:fit-content}
+.sb-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1.5px solid var(--border);padding:13px}
+.sb-title{font-size:.79rem;font-weight:800;color:var(--ink);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.sb-empty{font-size:.73rem;color:var(--ink-l);line-height:1.6}
+
+/* achievement */
+.prog-item{margin-bottom:9px}
+.prog-item:last-child{margin-bottom:0}
+.prog-label{display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:3px;align-items:center}
+.prog-name{color:var(--ink-m);font-weight:600}
+.prog-score{font-weight:800;font-size:.74rem}
+.prog-score.full{color:var(--rec)}
+.prog-score.part{color:var(--ext)}
+.prog-score.none{color:var(--ink-l)}
+.prog-track{height:7px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.prog-fill.pri{background:linear-gradient(90deg,var(--pri),#f87171)}
+.prog-fill.rec{background:linear-gradient(90deg,var(--rec),#34d399)}
+.miss-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.miss-chip{padding:2px 7px;border-radius:4px;font-size:.66rem;background:var(--pri-l);color:var(--pri);border:1px solid var(--pri-b)}
+.rec-chip{padding:2px 7px;border-radius:4px;font-size:.66rem;background:var(--ext-l);color:var(--ext);border:1px solid #fcd34d}
+.risk-note{margin-top:6px;padding:7px 9px;background:#fffbeb;border-radius:6px;border-left:3px solid #f59e0b;font-size:.69rem;color:#92400e;line-height:1.5}
+
+/* group check */
+.gc-row{display:flex;align-items:center;gap:6px;padding:4px 7px;border-radius:6px;font-size:.71rem;margin-bottom:3px;background:var(--bg)}
+.gc-code{font-weight:800;color:var(--acc);min-width:24px;font-size:.69rem}
+.gc-name{color:var(--ink-m);flex:1;font-size:.68rem}
+.gc-badge{padding:1px 7px;border-radius:8px;font-weight:700;font-size:.66rem;white-space:nowrap}
+.gc-ok{background:#d1fae5;color:#065f46}
+.gc-over{background:#fee2e2;color:#991b1b}
+.gc-partial{background:#fef3c7;color:#92400e}
+.gc-empty{background:#f1f5f9;color:#94a3b8}
+
+/* selected summary */
+.sel-chips{display:flex;flex-wrap:wrap;gap:3px}
+.sel-chip{padding:2px 8px;border-radius:4px;font-size:.67rem;background:var(--acc-l);color:var(--acc);border:1px solid #93c5fd}
+.sel-chip.pri{background:var(--pri-l);color:var(--pri);border-color:var(--pri-b)}
+.sel-chip.rec{background:var(--rec-l);color:var(--rec);border-color:var(--rec-b)}
+
+/* action buttons */
+.btn{width:100%;padding:9px;border-radius:8px;border:none;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;margin-top:3px}
+.btn-blue{background:var(--acc);color:#fff}
+.btn-blue:hover{background:var(--acc-d)}
+.btn-gray{background:var(--bg);color:var(--ink);border:1.5px solid var(--border)}
+.btn-gray:hover{border-color:var(--acc);color:var(--acc)}
+
+/* ─── POPUP ─── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:20px}
+.overlay.on{display:flex}
+.popup{background:#fff;border-radius:14px;padding:22px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.22);position:relative;animation:pop .18s ease}
+@keyframes pop{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+.pop-x{position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#94a3b8;line-height:1}
+.pop-name{font-size:1.05rem;font-weight:800;margin-bottom:4px}
+.pop-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.67rem;font-weight:700;margin-bottom:10px}
+.t-진로{background:#fee2e2;color:#991b1b}
+.t-일반{background:#dbeafe;color:#1d4ed8}
+.t-융합{background:#d1fae5;color:#065f46}
+.t-공통{background:#f3f4f6;color:#6b7280}
+.pop-desc{font-size:.79rem;color:#475569;line-height:1.75;margin-bottom:12px;white-space:pre-line}
+.pop-tags{display:flex;flex-wrap:wrap;gap:5px}
+.pop-tag{padding:3px 9px;border-radius:50px;font-size:.67rem;background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+
+/* ─── SUMMARY MODAL ─── */
+.sum-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
+.sum-modal.on{display:flex}
+.sum-box{background:#fff;border-radius:14px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.sum-h2{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.sum-section{margin-bottom:14px}
+.sum-section h3{font-size:.78rem;font-weight:700;color:var(--ink-m);margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.sum-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.77rem;border-bottom:1px solid #f8fafc}
+.sum-row:last-child{border:none}
+.sum-key{color:var(--ink-m)}
+.sum-val{font-weight:600}
+.sum-val.g{color:var(--rec)}.sum-val.w{color:var(--ext)}.sum-val.b{color:var(--pri)}
+.memo-box{width:100%;min-height:85px;padding:9px;border:1.5px solid var(--border);border-radius:8px;font-size:.77rem;font-family:inherit;resize:vertical;outline:none;color:var(--ink)}
+.memo-box:focus{border-color:var(--acc)}
+.sum-btns{display:flex;gap:8px;margin-top:12px}
+.sbtn{flex:1;padding:9px;border-radius:8px;border:none;font-size:.76rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.sbtn.p{background:var(--acc);color:#fff}.sbtn.p:hover{background:var(--acc-d)}
+.sbtn.s{background:var(--bg);color:var(--ink);border:1.5px solid var(--border)}.sbtn.s:hover{border-color:var(--acc)}
+
+@media(max-width:640px){
+  .main{padding:10px;gap:10px}
+  .career-bar{flex-direction:column;align-items:flex-start;gap:8px}
+  .legend{margin-left:0}
+  .career-sel{min-width:100%;width:100%}
+}
+@media print{
+  .career-bar,.sidebar,.overlay,.sum-modal,.hdr .step-guide,.hdr .sub{display:none!important}
+  .main{grid-template-columns:1fr;padding:0}
+  .sem-block.collapsed .sem-body{display:block!important}
+}
+
+/* ─── SCHOOL SELECT BAR ─── */
+.school-bar{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);padding:16px 20px;display:flex;align-items:center;gap:16px;border-bottom:2px solid rgba(255,255,255,.06);flex-wrap:wrap}
+.school-bar label{font-size:.85rem;color:#94a3b8;white-space:nowrap;font-weight:700;letter-spacing:-.01em}
+.school-btns{display:flex;gap:10px;flex-wrap:wrap}
+.school-btn{display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e2e8f0;cursor:pointer;font-family:inherit;transition:all .2s;min-width:180px}
+.school-btn:hover{border-color:#60a5fa;background:rgba(96,165,250,.15)}
+.school-btn.active{border-color:#60a5fa;background:rgba(96,165,250,.2);box-shadow:0 0 0 3px rgba(96,165,250,.2)}
+.school-icon{font-size:1.3rem;flex-shrink:0}
+.school-name{font-size:.88rem;font-weight:700;display:block;color:#f1f5f9}
+.school-desc{font-size:.69rem;color:#94a3b8;display:block;margin-top:1px}
+.school-btn span{display:block}
+.school-btn .school-icon{display:inline}
+/* hide main app until school selected */
+#mainApp{display:none}
+#schoolNotice{display:flex;align-items:center;justify-content:center;min-height:200px;color:#94a3b8;font-size:.9rem;flex-direction:column;gap:8px;padding:40px}
+@media(max-width:640px){.school-bar{flex-direction:column;align-items:flex-start}.school-btns{width:100%}.school-btn{flex:1;min-width:140px}}
+
+
+/* ─── GIRLS 추가 군 색상 (G군: 청록, C군: 인디고) ─── */
+.g-G{background:#f0fdfa;border-color:#99f6e4;color:#0f766e}
+.g-C{background:#eef2ff;border-color:#c7d2fe;color:#3730a3}
+.sel.g-G{background:#99f6e4;border-color:#0d9488;color:#0f766e;font-weight:700}
+.sel.g-C{background:#c7d2fe;border-color:#4f46e5;color:#3730a3;font-weight:700}
+</style>
+</head>
+<body>
+<script src="../common/navigation.js"></script>
+
+<!-- ═══ HEADER ═══ -->
+<div class="hdr">
+  <h1>📚 창원경일 선택과목 설계 도우미</h1>
+  <p class="sub" id="schoolSubTitle">학교를 선택하면 해당 학교의 편제표가 적용됩니다</p>
+  <div class="step-guide">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text"><strong>진로 선택</strong>아래 드롭다운에서 희망 진로를 고르세요</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text"><strong>과목 확인</strong>빨간·초록 테두리 과목이 핵심 과목입니다</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text"><strong>과목 선택</strong>클릭하면 ✓ 체크됩니다 (우클릭=과목 설명)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text"><strong>결과 확인</strong>오른쪽에서 달성률·선택군을 점검하세요</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCHOOL SELECT BAR ═══ -->
+<div class="school-bar" id="schoolBar">
+  <label>🏫 학교 선택</label>
+  <div class="school-btns">
+    <button class="school-btn" id="btnGirls" onclick="selectSchool('girls')">
+      <span class="school-icon">👩</span>
+      <span class="school-name">창원경일여고</span>
+      <span class="school-desc">여자고등학교 편제표</span>
+    </button>
+    <button class="school-btn" id="btnBoys" onclick="selectSchool('boys')">
+      <span class="school-icon">👦</span>
+      <span class="school-name">창원경일고</span>
+      <span class="school-desc">남자고등학교 편제표</span>
+    </button>
+  </div>
+</div>
+<div id="schoolNotice"><div style="font-size:2rem">🏫</div><div>위에서 학교를 선택하면 해당 편제표가 적용됩니다</div></div>
+
+<!-- ═══ CAREER BAR ═══ -->
+<div id="mainApp">
+<div class="career-bar">
+  <label>🎯 희망 진로</label>
+  <select class="career-sel" id="careerSel" onchange="onCareerChange()">
+    <option value="">— 희망 진로를 선택하세요 —</option>
+    <optgroup label="── 진로가 아직 불확실해요 ──">
+      <option value="_undecided">아직 잘 모르겠어요 (균형 선택 안내)</option>
+      <option value="_stem">이공계 가능성을 열어두고 싶어요</option>
+      <option value="_hum">인문사회 쪽이 더 가까워요</option>
+      <option value="_med">보건·의약계열도 고민 중이에요</option>
+      <option value="_biz">경영·경제 쪽도 고민 중이에요</option>
+    </optgroup>
+    <optgroup label="── 희망 진로가 어느 정도 있어요 ──">
+    </optgroup>
+  </select>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot pri"></div>우선 과목 (가장 중요)</div>
+    <div class="leg-item"><div class="leg-dot rec"></div>권장 과목 (함께 선택)</div>
+    <div class="leg-item"><div class="leg-dot sel"></div>내가 선택한 과목</div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div class="sched-wrap" id="schedWrap"></div>
+  <div class="sidebar">
+
+    <!-- 달성률 -->
+    <div class="sb-card" id="achCard">
+      <div class="sb-title">📊 진로 달성률</div>
+      <p class="sb-empty">① 위에서 희망 진로를 선택하면<br>핵심 과목 달성률을 확인할 수 있습니다.</p>
+    </div>
+
+    <!-- 선택군 -->
+    <div class="sb-card">
+      <div class="sb-title">✅ 선택군 현황</div>
+      <div id="gcWrap"><p class="sb-empty">과목을 선택하면 현황이 표시됩니다.</p></div>
+    </div>
+
+    <!-- 내 선택 -->
+    <div class="sb-card">
+      <div class="sb-title">📋 내 선택 과목</div>
+      <div id="selWrap"><p class="sb-empty">과목을 선택하면 여기에 표시됩니다.</p></div>
+    </div>
+
+    <button class="btn btn-blue" onclick="openSummary()">📄 상담 결과 요약 보기</button>
+    <button class="btn btn-gray" onclick="clearAll()">↺ 전체 초기화</button>
+  </div>
+</div>
+
+</div><!-- end mainApp -->
+<!-- POPUP -->
+<div class="overlay" id="popOverlay" onclick="if(event.target===this)closePopup()">
+  <div class="popup">
+    <button class="pop-x" onclick="closePopup()">✕</button>
+    <div class="pop-name" id="popName"></div>
+    <span class="pop-badge" id="popBadge"></span>
+    <p class="pop-desc" id="popDesc"></p>
+    <div class="pop-tags" id="popTags"></div>
+  </div>
+</div>
+
+<!-- SUMMARY MODAL -->
+<div class="sum-modal" id="sumModal" onclick="if(event.target===this)closeSummary()">
+  <div class="sum-box">
+    <div class="sum-h2">📋 선택과목 상담 결과
+      <button class="pop-x" style="position:static" onclick="closeSummary()">✕</button>
+    </div>
+    <div id="sumContent"></div>
+    <div class="sum-btns">
+      <button class="sbtn p" onclick="window.print()">🖨️ 인쇄 / PDF</button>
+      <button class="sbtn s" onclick="copyResult()">📋 결과 복사</button>
+      <button class="sbtn s" onclick="closeSummary()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════
+const CARDS=[{"id": "C01", "title": "컴퓨터·AI·소프트웨어", "category": "이공계", "keywords": ["컴공", "컴퓨터공학", "AI", "인공지능", "개발자", "코딩", "소프트웨어", "프로그래밍", "앱개발", "게임개발", "데이터사이언스", "머신러닝", "딥러닝"], "summary": "미적분Ⅱ, 기하, 물리학, 인공지능 수학을 우선 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "A군", "advice": "인공지능 수학 우선 선택"}, {"period": "2학년 1학기", "group": "B군", "advice": "물리학 선택 권장"}, {"period": "2학년 2학기", "group": "D군", "advice": "기하 우선 선택"}, {"period": "2학년 2학기", "group": "F군", "advice": "인공지능 기초 선택"}, {"period": "3학년 1학기", "group": "H군", "advice": "미적분Ⅱ 선택"}], "risks": ["D군에서 기하를 선택하지 않으면 공학계열 수학 이수 근거가 약해질 수 있습니다.", "H군에서 미적분Ⅱ를 선택하지 않으면 이공계 심화 수학 이수 근거가 부족해질 수 있습니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어", "일반사회", "역사", "지리"], "우선선택": ["미적분Ⅱ", "기하", "물리학", "인공지능 수학"], "권장선택": ["정보", "인공지능 기초"], "확장선택": ["화학", "생명과학"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "컴퓨터정보공학부", "core": "물리학, 수학", "recommended": "", "note": "-물리학: 과목 1과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "가톨릭대", "department": "인공지능학과", "core": "물리학, 수학", "recommended": "", "note": "-물리학: 과목 1과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "가톨릭대", "department": "AI의공학과", "core": "화학, 생명과학, 수학", "recommended": "", "note": "-화학, 생명과학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "가톨릭대", "department": "데이터사이언스학과", "core": "수학", "recommended": "", "note": "과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "공학", "core": "수학(대수, 미적분Ⅰ, 미적분Ⅱ, 기하), 과학(물리학)", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수 추천"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "경희대", "department": "컴퓨터", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 기하", "recommended": "인공지능 수학", "note": ""}, {"university": "고려대", "department": "공과대학", "core": "(권장) 미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 기하", "recommended": "미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 기하", "note": "과학 교과 권장 과목 중 2과목 이상 권장"}, {"university": "고려대", "department": "정보대학", "core": "(권장) 미적분Ⅱ, 기하", "recommended": "미적분Ⅱ, 기하", "note": ""}, {"university": "고려대", "department": "스마트보안학부", "core": "(권장) 미적분Ⅱ, 기하", "recommended": "미적분Ⅱ, 기하", "note": ""}, {"university": "광운대", "department": "인공지능융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 정보", "recommended": "기하, 미적분Ⅱ, 인공지능 수학, 역학과 에너지, 전자기와 양자, 물질과 에너지", "note": "융합선택 과목: 실용 통계, 수학과제 탐구, 융합과학 탐구"}, {"university": "광운대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학, 정보", "recommended": "기하, 미적분Ⅱ, 도시의 미래탐구, 역학과 에너지, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "융합선택 과목: 실용 통계, 수학과제 탐구, 기후변화와 지속가능한 세계, 과학의 역사와 문화, 기후변화와 환경생태, 융합과학 탐구"}, {"university": "국민대", "department": "창의공과대학", "core": "미적분Ⅰ, 물리학, 화학, 대수, 미적분Ⅱ", "recommended": "기하, 역학과 에너지, 물질과 에너지, 전자기와 양자, 미적분Ⅱ, 확률과 통계, 화학", "note": ""}, {"university": "국민대", "department": "소프트웨어융합대학", "core": "확률과 통계, 미적분Ⅰ", "recommended": "미적분Ⅱ, 기하", "note": ""}, {"university": "국민대", "department": "과학기술대학", "core": "확률과 통계, 미적분Ⅰ, 화학, 생명과학, 대수, 물리학", "recommended": "미적분Ⅱ, 세포와 물질대사, 화학 반응의 세계, 생물의 유전, 역학과 에너지, 전자기와 양자, 인공지능 수학, 물질과 에너지, 기하", "note": "교과를 제시하지 않은 모집단위는 학생의 진로와 적성을 고려하여 교과목을 선택 이수할 것."}, {"university": "덕성여대", "department": "글로벌융합대학", "core": "국어, 영어, 사회(역사/도덕 포함), 제2외국어/한문 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "덕성여대", "department": "과학기술대학", "core": "수학, 과학 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "동국대", "department": "공과", "core": "수학②, 물리학, 화학", "recommended": "지구과학, 생명과학, 물리학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "동국대", "department": "첨단융합", "core": "수학②, 물리학, 화학", "recommended": "", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임."}, {"university": "서울과기대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "서울과기대", "department": "창의융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 화학, 화학미적분Ⅱ, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "서울대", "department": "공과대학", "core": "물리학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울대", "department": "첨단융합학부", "core": "(권장) 기하, 미적분Ⅱ, 과학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울시립대", "department": "전자전기컴퓨터공학부", "core": "수학(특히 미적분), 물리", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "컴퓨터과학부", "core": "수학(특히 미적분)", "recommended": "과학", "note": ""}, {"university": "서울시립대", "department": "인공지능학과", "core": "(권장) 물리", "recommended": "물리", "note": ""}, {"university": "서울시립대", "department": "첨단융합학부 첨단인공지능전공", "core": "수학", "recommended": "", "note": ""}, {"university": "숭실대", "department": "공과대학", "core": "수학, 과학(화학) 교과 영역 이수 권장, 과학(물리학) 교과 영역 이수 권장, 과학 교과 영역 이수 권장", "recommended": "", "note": "-수학: 기하, 미적분Ⅱ 중 이수 권장\n-‘과학’으로 포괄적으로 제시된 경우 진로와 관심에 따라 교과목을 선택할 것을 권장하며, 권장 영역 외 과학 과목 이수도 의미 있게 평가에 반영함"}, {"university": "숭실대", "department": "AI대학", "core": "수학, 과학 교과 영역 이수 권장", "recommended": "", "note": "-수학: 기하, 미적분Ⅱ 중 이수 권장\n-‘과학’으로 포괄적으로 제시된 경우 진로와 관심에 따라 교과목을 선택할 것을 권장하며, 권장 영역 외 과학 과목 이수도 의미 있게 평가에 반영함"}, {"university": "중앙대", "department": "소프트웨어학부", "core": "미적분Ⅱ, 기하, 물리학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "중앙대", "department": "AI학부", "core": "미적분Ⅱ, 기하", "recommended": "", "note": ""}, {"university": "인하대", "department": "공과대학", "core": "물리학, 화학", "recommended": "화학, 지구과학, 물리학, 생명과학, 물리", "note": "*교과 영역은 내용 상위계가 뚜렷한 특성을 지닌 과학 교과 영역을 중심으로 안내함.\n -수학 교과: 대수, 미적분Ⅰ, 확률과 통계 교과목 이수를 권장하며, 공과대학의 경우 기하 교과목도 포함하여 이수할 것을 권장함."}, {"university": "인하대", "department": "소프트웨어융합대학", "core": "물리학", "recommended": "화학", "note": "*교과 영역은 내용 상위계가 뚜렷한 특성을 지닌 과학 교과 영역을 중심으로 안내함.\n -수학 교과: 대수, 미적분Ⅰ, 확률과 통계 교과목 이수를 권장하며, 공과대학의 경우 기하 교과목도 포함하여 이수할 것을 권장함."}, {"university": "아주대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "아주대", "department": "소프트웨어융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한국항공대", "department": "공학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 기하", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한양대(ERICA)", "department": "공학대학", "core": "(권장) 대수, 미적분, 물리학, 화학, 지구과학, 확률과 통계, 기본수학", "recommended": "대수, 미적분, 물리학, 화학, 지구과학, 확률과 통계, 기본수학", "note": ""}, {"university": "한양대(ERICA)", "department": "소프트웨어융합대학", "core": "(권장) 미적분, 확률과 통계, 물리학, 화학, 수학 전 과목", "recommended": "미적분, 확률과 통계, 물리학, 화학, 수학 전 과목", "note": ""}, {"university": "협성대", "department": "이공대학", "core": "이공계열 적성과 진로에 따라 선택 과목 이수", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "동아대", "department": "공과대학", "core": "영어, 수학, 과학, 국어", "recommended": "", "note": ""}, {"university": "동아대", "department": "소프트웨어대학", "core": "영어, 수학, 과학", "recommended": "", "note": ""}, {"university": "동아대", "department": "융합대학", "core": "국어, 영어, 수학, 사회, 과학", "recommended": "", "note": ""}, {"university": "부산대", "department": "공과대학", "core": "확률과 통계, 기하, 미적분Ⅱ, 물리학, 화학", "recommended": "", "note": "제시 과목 중 2과목 이상 이수"}, {"university": "경북대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 전자기와 양자, 화학 반응의 세계, 역학과 에너지, 물질과 에너지", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "과학기술대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "2과목 이상(위계에 맞게) 이수 권장"}, {"university": "영남대", "department": "전기·전자·컴퓨터", "core": "-일반선택: 화법과 언어, 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 물리학, 정보\n-진로선택: 직무 의사소통, 기하, 미적분Ⅱ, 경제 수학, 인공지능 수학, 직무 수학, 심화 영어, 직무 영어, 역학과 에너지, 전자기와 양자, 로봇과 공학세계, 생활과학 탐구, 인공지능 기초, 데이터 과학, 논리와 사고", "recommended": "", "note": "1순위 과학 / 2순위 수학 / 3순위 영어"}, {"university": "국립한밭대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "국립한밭대", "department": "정보기술대학", "core": "수학, 과학", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "충남대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "충남대", "department": "공학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "강원대 (삼척·도계)", "department": "공학대학", "core": "미적분, 물리학, 화학, 영어 독해와 작문, 영어 발표와 토론, 화법과 언어, 독서와 작문, 사회와 문화, 기술․ 가정, 인간과 철학, 생태와 환경, 확률과 통계", "recommended": "영어, 수학, 과학, 국어, 사회, 기술·가정/교양", "note": ""}, {"university": "충북대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "충북대", "department": "전자정보대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "충북대", "department": "창의융합대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "한국기술교육대", "department": "공합융합계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": ""}, {"university": "한국기술교육대", "department": "ICT융합계열 컴퓨터공학부", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": ""}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "공과대학", "core": "수학, 영어, 사회, 물리학, 화학, 생명과학", "recommended": "", "note": "-지리: 세계시민과 지리, 한국지리 탐구, 도시의 미래 탐구\n -역사: 세계사, 동아시아 역사기행\n -일반사회: 사회와 문화, 정치, 법과 사회, 경제, 국제관계의 이해\n -윤리: 현대사회와 윤리, 윤리와 사상, 인문학과 윤리\n -사회: 상기 지리, 역사, 일반사회, 윤리 전 과목\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "AI융합대학", "core": "수학, 영어, 물리학", "recommended": "", "note": ""}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "공과대학", "core": "수학, 사회, 과학", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "전주대", "department": "공과대학", "core": "국어, 영어, 대수, 미적분Ⅰ, 기하, 미적분Ⅱ, 사회, 과학, 수학, 물리학, 화학, 기술·가정, 정보, 로봇과 공학세계, 인공지능 기초, 데이터과학, 과학(진로, 융합)", "recommended": "", "note": "-국어, 영어: 1과목 이상\n-사회: 일반선택 과목, 진로선택 과목 1과목 이상\n-과학: 일반선택 과목, 진로선택 과목 2과목 이상"}, {"university": "전주대", "department": "소프트웨어융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 인공지능 수학, 정보, 인공지능기초, 데이터과학, 미적분Ⅱ, 기술·가정, 인공지능 기초, 데이터 과학", "recommended": "", "note": ""}, {"university": "전남대 (여수)", "department": "공과대학", "core": "수학, 물리학, 화학, 국어, 사회, 영어", "recommended": "", "note": "-물리학: 물리학, 역학과 에너지, 전자기와 양자\n -화학: 화학, 물질과 에너지, 화학 반응의 세계\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장함."}]}, {"id": "C02", "title": "전기전자·반도체", "category": "이공계", "keywords": ["전기", "전자", "전자공학", "반도체", "칩", "회로", "통신", "소자", "임베디드", "전기공학"], "summary": "미적분Ⅱ, 기하, 물리학, 전자기와 양자를 우선 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "물리학 우선, 화학 병행 가능"}, {"period": "2학년 2학기", "group": "D군", "advice": "기하 우선 선택"}, {"period": "2학년 2학기", "group": "E군", "advice": "역학과 에너지 또는 물질과 에너지"}, {"period": "3학년 1학기", "group": "H군", "advice": "미적분Ⅱ 선택"}, {"period": "3학년 1/2학기", "group": "I군", "advice": "전자기와 양자 우선 선택"}], "risks": ["B군에서 물리학을 선택하지 않으면 전기전자 핵심 이수 근거가 약해질 수 있습니다.", "D군에서 기하를 선택하지 않으면 공학계열 수학 이수 근거가 약해질 수 있습니다.", "I군에서 전자기와 양자를 선택하지 않으면 전기전자·반도체 심화 근거가 부족해질 수 있습니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어", "일반사회", "역사", "지리"], "우선선택": ["미적분Ⅱ", "기하", "물리학", "화학", "전자기와 양자"], "권장선택": ["물질과 에너지"], "확장선택": ["생명과학"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "정보통신전자공학부", "core": "물리학, 화학, 수학", "recommended": "", "note": "-물리학, 화학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "공학", "core": "수학(대수, 미적분Ⅰ, 미적분Ⅱ, 기하), 과학(물리학)", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수 추천"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "경희대", "department": "전기·전자", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "고려대", "department": "공과대학", "core": "(권장) 미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 기하", "recommended": "미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 기하", "note": "과학 교과 권장 과목 중 2과목 이상 권장"}, {"university": "광운대", "department": "전자정보공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 정보, 기술·가정", "recommended": "기하, 미적분Ⅱ, 인공지능 수학, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계", "note": "융합선택 과목: 실용 통계, 수학과제 탐구, 융합과학 탐구"}, {"university": "광운대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학, 정보", "recommended": "기하, 미적분Ⅱ, 도시의 미래탐구, 역학과 에너지, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "융합선택 과목: 실용 통계, 수학과제 탐구, 기후변화와 지속가능한 세계, 과학의 역사와 문화, 기후변화와 환경생태, 융합과학 탐구"}, {"university": "국민대", "department": "창의공과대학", "core": "미적분Ⅰ, 물리학, 화학, 대수, 미적분Ⅱ", "recommended": "기하, 역학과 에너지, 물질과 에너지, 전자기와 양자, 미적분Ⅱ, 확률과 통계, 화학", "note": ""}, {"university": "국민대", "department": "과학기술대학", "core": "확률과 통계, 미적분Ⅰ, 화학, 생명과학, 대수, 물리학", "recommended": "미적분Ⅱ, 세포와 물질대사, 화학 반응의 세계, 생물의 유전, 역학과 에너지, 전자기와 양자, 인공지능 수학, 물질과 에너지, 기하", "note": "교과를 제시하지 않은 모집단위는 학생의 진로와 적성을 고려하여 교과목을 선택 이수할 것."}, {"university": "덕성여대", "department": "글로벌융합대학", "core": "국어, 영어, 사회(역사/도덕 포함), 제2외국어/한문 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "덕성여대", "department": "과학기술대학", "core": "수학, 과학 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "동국대", "department": "공과", "core": "수학②, 물리학, 화학", "recommended": "지구과학, 생명과학, 물리학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "동국대", "department": "첨단융합", "core": "수학②, 물리학, 화학", "recommended": "", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임."}, {"university": "서울과기대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "서울과기대", "department": "정보통신대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "서울과기대", "department": "창의융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 화학, 화학미적분Ⅱ, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "서울대", "department": "공과대학", "core": "물리학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울대", "department": "첨단융합학부", "core": "(권장) 기하, 미적분Ⅱ, 과학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울시립대", "department": "첨단융합학부 지능형반도체전공", "core": "수학, 물리, 화학", "recommended": "", "note": ""}, {"university": "숭실대", "department": "공과대학", "core": "수학, 과학(화학) 교과 영역 이수 권장, 과학(물리학) 교과 영역 이수 권장, 과학 교과 영역 이수 권장", "recommended": "", "note": "-수학: 기하, 미적분Ⅱ 중 이수 권장\n-‘과학’으로 포괄적으로 제시된 경우 진로와 관심에 따라 교과목을 선택할 것을 권장하며, 권장 영역 외 과학 과목 이수도 의미 있게 평가에 반영함"}, {"university": "숭실대", "department": "IT대학", "core": "수학, 과학 교과 영역 이수 권장, 과학(물리학) 교과 영역 이수 권장", "recommended": "", "note": "-수학: 기하, 미적분Ⅱ 중 이수 권장\n-‘과학’으로 포괄적으로 제시된 경우 진로와 관심에 따라 교과목을 선택할 것을 권장하며, 권장 영역 외 과학 과목 이수도 의미 있게 평가에 반영함"}, {"university": "중앙대", "department": "전자전기공학부", "core": "미적분Ⅱ, 기하, 물리학, 화학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "중앙대", "department": "지능형반도체공학과", "core": "미적분Ⅱ, 기하, 물리학, 화학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "인하대", "department": "공과대학", "core": "물리학, 화학", "recommended": "화학, 지구과학, 물리학, 생명과학, 물리", "note": "*교과 영역은 내용 상위계가 뚜렷한 특성을 지닌 과학 교과 영역을 중심으로 안내함.\n -수학 교과: 대수, 미적분Ⅰ, 확률과 통계 교과목 이수를 권장하며, 공과대학의 경우 기하 교과목도 포함하여 이수할 것을 권장함."}, {"university": "성결대", "department": "IT공과대학", "core": "공학계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": "교과(군)별 과목의 위계를 따라 일반선택 과목을 우선 이수하고, 진로와 적성에 맞게 진로선택 과목과 융합선택 과목 이수 권장"}, {"university": "아주대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "아주대", "department": "첨단ICT융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한국항공대", "department": "공학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 기하", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한양대(ERICA)", "department": "공학대학", "core": "(권장) 대수, 미적분, 물리학, 화학, 지구과학, 확률과 통계, 기본수학", "recommended": "대수, 미적분, 물리학, 화학, 지구과학, 확률과 통계, 기본수학", "note": ""}, {"university": "한양대(ERICA)", "department": "첨단융합대학 차세대반도체융합공학부", "core": "(권장) 미적분, 확률과 통계, 물리학, 화학", "recommended": "미적분, 확률과 통계, 물리학, 화학", "note": ""}, {"university": "협성대", "department": "이공대학", "core": "이공계열 적성과 진로에 따라 선택 과목 이수", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "동아대", "department": "공과대학", "core": "영어, 수학, 과학, 국어", "recommended": "", "note": ""}, {"university": "동아대", "department": "융합대학", "core": "국어, 영어, 수학, 사회, 과학", "recommended": "", "note": ""}, {"university": "부산대", "department": "공과대학", "core": "확률과 통계, 기하, 미적분Ⅱ, 물리학, 화학", "recommended": "", "note": "제시 과목 중 2과목 이상 이수"}, {"university": "경북대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 전자기와 양자, 화학 반응의 세계, 역학과 에너지, 물질과 에너지", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "IT대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학", "recommended": "미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "과학기술대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "2과목 이상(위계에 맞게) 이수 권장"}, {"university": "POSTECH", "department": "반도체공학과", "core": "국어, 수학, 영어, 과학 전 과목", "recommended": "", "note": ""}, {"university": "국립한밭대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "충남대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "충남대", "department": "공학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "강원대 (춘천)", "department": "IT대학", "core": "확률과 통계, 미적분, 생명과학, 화학, 영어 독해와 작문, 물리학, 영어 발표와 토론, 인공지능 수학, 융합과학 탐구", "recommended": "영어, 수학, 체육, 과학", "note": ""}, {"university": "강원대 (삼척·도계)", "department": "공학대학", "core": "미적분, 물리학, 화학, 영어 독해와 작문, 영어 발표와 토론, 화법과 언어, 독서와 작문, 사회와 문화, 기술․ 가정, 인간과 철학, 생태와 환경, 확률과 통계", "recommended": "영어, 수학, 과학, 국어, 사회, 기술·가정/교양", "note": ""}, {"university": "충북대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "충북대", "department": "창의융합대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "한국기술교육대", "department": "공합융합계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": ""}, {"university": "한국기술교육대", "department": "ICT융합계열 전기·전자·통신공학부", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": ""}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "공과대학", "core": "수학, 영어, 사회, 물리학, 화학, 생명과학", "recommended": "", "note": "-지리: 세계시민과 지리, 한국지리 탐구, 도시의 미래 탐구\n -역사: 세계사, 동아시아 역사기행\n -일반사회: 사회와 문화, 정치, 법과 사회, 경제, 국제관계의 이해\n -윤리: 현대사회와 윤리, 윤리와 사상, 인문학과 윤리\n -사회: 상기 지리, 역사, 일반사회, 윤리 전 과목\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "공과대학", "core": "수학, 사회, 과학", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "IT융합대학", "core": "수학, 과학, 영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "전주대", "department": "공과대학", "core": "국어, 영어, 대수, 미적분Ⅰ, 기하, 미적분Ⅱ, 사회, 과학, 수학, 물리학, 화학, 기술·가정, 정보, 로봇과 공학세계, 인공지능 기초, 데이터과학, 과학(진로, 융합)", "recommended": "", "note": "-국어, 영어: 1과목 이상\n-사회: 일반선택 과목, 진로선택 과목 1과목 이상\n-과학: 일반선택 과목, 진로선택 과목 2과목 이상"}, {"university": "전남대 (여수)", "department": "공과대학", "core": "수학, 물리학, 화학, 국어, 사회, 영어", "recommended": "", "note": "-물리학: 물리학, 역학과 에너지, 전자기와 양자\n -화학: 화학, 물질과 에너지, 화학 반응의 세계\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장함."}]}, {"id": "C03", "title": "기계·로봇·항공우주", "category": "이공계", "keywords": ["기계", "기계공학", "로봇", "항공", "항공우주", "자동차", "드론", "제어", "메카트로닉스", "우주"], "summary": "역학과 에너지, 물리학, 미적분Ⅱ, 기하를 우선 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "물리학 우선 선택"}, {"period": "2학년 2학기", "group": "D군", "advice": "기하 우선 선택"}, {"period": "2학년 2학기", "group": "E군", "advice": "역학과 에너지 우선 선택"}, {"period": "2학년 2학기", "group": "F군", "advice": "로봇과 공학세계 권장"}, {"period": "3학년 1학기", "group": "H군", "advice": "미적분Ⅱ 선택"}], "risks": ["E군에서 역학과 에너지를 선택하지 않으면 기계·항공우주 전공 연계 근거가 약해질 수 있습니다.", "D군에서 기하를 선택하지 않으면 공학계열 수학 이수 근거가 약해질 수 있습니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어", "일반사회", "역사", "지리"], "우선선택": ["미적분Ⅱ", "기하", "물리학", "역학과 에너지"], "권장선택": ["화학", "로봇과 공학세계"], "확장선택": []}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "건국대", "department": "건축", "core": "수학(대수, 미적분Ⅰ, 미적분Ⅱ, 확률과 통계), 과학", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수 추천"}, {"university": "건국대", "department": "공학", "core": "수학(대수, 미적분Ⅰ, 미적분Ⅱ, 기하), 과학(물리학)", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수 추천"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "경희대", "department": "산업", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ", "recommended": "", "note": ""}, {"university": "경희대", "department": "기계", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자", "recommended": "물질과 에너지, 화학 반응의 세계", "note": ""}, {"university": "경희대", "department": "건설/건축", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 물리학", "recommended": "기하, 미적분Ⅱ, 물리학", "note": ""}, {"university": "고려대", "department": "공과대학", "core": "(권장) 미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 기하", "recommended": "미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 기하", "note": "과학 교과 권장 과목 중 2과목 이상 권장"}, {"university": "고려대", "department": "스마트모빌리티학부", "core": "(권장) 미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "과학 교과 권장 과목 중 2과목 이상 권장"}, {"university": "광운대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학, 정보", "recommended": "기하, 미적분Ⅱ, 도시의 미래탐구, 역학과 에너지, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "융합선택 과목: 실용 통계, 수학과제 탐구, 기후변화와 지속가능한 세계, 과학의 역사와 문화, 기후변화와 환경생태, 융합과학 탐구"}, {"university": "국민대", "department": "창의공과대학", "core": "미적분Ⅰ, 물리학, 화학, 대수, 미적분Ⅱ", "recommended": "기하, 역학과 에너지, 물질과 에너지, 전자기와 양자, 미적분Ⅱ, 확률과 통계, 화학", "note": ""}, {"university": "국민대", "department": "자동차융합대학", "core": "미적분Ⅰ, 물리학", "recommended": "미적분Ⅱ, 기하", "note": ""}, {"university": "국민대", "department": "과학기술대학", "core": "확률과 통계, 미적분Ⅰ, 화학, 생명과학, 대수, 물리학", "recommended": "미적분Ⅱ, 세포와 물질대사, 화학 반응의 세계, 생물의 유전, 역학과 에너지, 전자기와 양자, 인공지능 수학, 물질과 에너지, 기하", "note": "교과를 제시하지 않은 모집단위는 학생의 진로와 적성을 고려하여 교과목을 선택 이수할 것."}, {"university": "국민대", "department": "건축대학", "core": "대수, 미적분Ⅰ, 물리학", "recommended": "기하, 미적분Ⅱ", "note": ""}, {"university": "덕성여대", "department": "글로벌융합대학", "core": "국어, 영어, 사회(역사/도덕 포함), 제2외국어/한문 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "덕성여대", "department": "과학기술대학", "core": "수학, 과학 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "동국대", "department": "공과", "core": "수학②, 물리학, 화학", "recommended": "지구과학, 생명과학, 물리학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "동국대", "department": "첨단융합", "core": "수학②, 물리학, 화학", "recommended": "", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임."}, {"university": "동국대", "department": "열린전공학부(자연)", "core": "수학②", "recommended": "물리학, 화학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "서울과기대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "서울과기대", "department": "창의융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 화학, 화학미적분Ⅱ, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "서울대", "department": "공과대학", "core": "물리학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울대", "department": "첨단융합학부", "core": "(권장) 기하, 미적분Ⅱ, 과학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울시립대", "department": "기계정보공학과", "core": "미적분", "recommended": "기하, 확률과 통계, 물리", "note": ""}, {"university": "서울시립대", "department": "토목공학과", "core": "수학(특히 미적분), 물리", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "건축학부 건축공학전공", "core": "수학(특히 미적분, 기하), 물리, 영어", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "도시공학과", "core": "국어, 영어, 수학", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "교통공학과", "core": "수학, 물리", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "공간정보공학과", "core": "수학(특히 미적분), 과학(지구과학, 물리학)", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "자유전공학부(자연)", "core": "수학, 과학", "recommended": "국어, 영어", "note": ""}, {"university": "숭실대", "department": "공과대학", "core": "수학, 과학(화학) 교과 영역 이수 권장, 과학(물리학) 교과 영역 이수 권장, 과학 교과 영역 이수 권장", "recommended": "", "note": "-수학: 기하, 미적분Ⅱ 중 이수 권장\n-‘과학’으로 포괄적으로 제시된 경우 진로와 관심에 따라 교과목을 선택할 것을 권장하며, 권장 영역 외 과학 과목 이수도 의미 있게 평가에 반영함"}, {"university": "중앙대", "department": "기계공학부", "core": "미적분Ⅱ, 기하, 물리학, 화학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "중앙대", "department": "사회기반시스템공학부 건설환경플랜트공학전공", "core": "미적분Ⅱ, 기하, 물리학, 화학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "중앙대", "department": "건축학부", "core": "미적분Ⅱ, 기하, 물리학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "한양대", "department": "자연", "core": "미적분Ⅱ 또는 기하, 물리학/화학/생명과학 중 1과목 이상, 과학 진로선택 과목 2과목 이상", "recommended": "", "note": "진로선택 과목은 계열과 교과 위계에 맞게 선택하는 것을 권장함."}, {"university": "인하대", "department": "공과대학", "core": "물리학, 화학", "recommended": "화학, 지구과학, 물리학, 생명과학, 물리", "note": "*교과 영역은 내용 상위계가 뚜렷한 특성을 지닌 과학 교과 영역을 중심으로 안내함.\n -수학 교과: 대수, 미적분Ⅰ, 확률과 통계 교과목 이수를 권장하며, 공과대학의 경우 기하 교과목도 포함하여 이수할 것을 권장함."}, {"university": "단국대", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "아주대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한국항공대", "department": "공학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 기하", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한양대(ERICA)", "department": "공학대학", "core": "(권장) 대수, 미적분, 물리학, 화학, 지구과학, 확률과 통계, 기본수학", "recommended": "대수, 미적분, 물리학, 화학, 지구과학, 확률과 통계, 기본수학", "note": ""}, {"university": "협성대", "department": "이공대학", "core": "이공계열 적성과 진로에 따라 선택 과목 이수", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "경성대학교", "department": "자연", "core": "화학 또는 생명과학", "recommended": "미적분Ⅱ, 기하", "note": "과학 진로선택 3과목 이상 이수 권장"}, {"university": "동아대", "department": "공과대학", "core": "영어, 수학, 과학, 국어", "recommended": "", "note": ""}, {"university": "동아대", "department": "융합대학", "core": "국어, 영어, 수학, 사회, 과학", "recommended": "", "note": ""}, {"university": "부산대", "department": "공과대학", "core": "확률과 통계, 기하, 미적분Ⅱ, 물리학, 화학", "recommended": "", "note": "제시 과목 중 2과목 이상 이수"}, {"university": "경북대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 전자기와 양자, 화학 반응의 세계, 역학과 에너지, 물질과 에너지", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "과학기술대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "2과목 이상(위계에 맞게) 이수 권장"}, {"university": "영남대", "department": "건설", "core": "-일반선택: 화법과 언어, 독서와 작문, 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 물리학, 화학, 생명과학, 지구과학, 세계시민과 지리, 세계사, 사회와 문화, 미술, 정보, 생태와 환경\n-진로선택: 직무 의사소통, 기하, 미적분Ⅱ, 직무 수학, 영어 발표와 토론, 역학과 에너지, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 지구시스템과학, 한국지리 탐구, 도시의 미래 탐구, 동아시아 역사기행, 인공지능 기초, 미술 창작, 미술 감상과 비평, 인간과 철학, 논리와 사고, 인간과 심리", "recommended": "", "note": "1순위 수학 / 2순위 과학 / 3순위 영어"}, {"university": "영남대", "department": "기계", "core": "-일반선택: 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 물리학, 화학, 정보\n-진로선택: 기하, 미적분Ⅱ, 인공지능 수학, 영어 발표와 토론, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 로봇과 공학세계, 인공지능 기초, 데이터 과학", "recommended": "", "note": "1순위 수학 / 2순위 과학 / 3순위 영어"}, {"university": "국립한밭대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "국립한밭대", "department": "건설환경디자인대학", "core": "수학, 과학, 국어, 영어", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "충남대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "충남대", "department": "자연과학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "충남대", "department": "공학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "강원대 (춘천)", "department": "문화예술·공과대학", "core": "미적분, 기하, 물리학, 정보, 인공지능 기초, 영어 독해와 작문, 영어 발표와 토론, 화학, 확률과 통계, 지구과학, 생명과학, 융합과학 탐구, 화법과 언어, 문학, 독서와 작문, 사회와 문화", "recommended": "수학, 과학, 기술·가정/정보, 영어, 국어, 사회", "note": ""}, {"university": "강원대 (삼척·도계)", "department": "공학대학", "core": "미적분, 물리학, 화학, 영어 독해와 작문, 영어 발표와 토론, 화법과 언어, 독서와 작문, 사회와 문화, 기술․ 가정, 인간과 철학, 생태와 환경, 확률과 통계", "recommended": "영어, 수학, 과학, 국어, 사회, 기술·가정/교양", "note": ""}, {"university": "한라대", "department": "스마트모빌리티융합대학", "core": "국어, 영어, 수학, 사회(역사/도덕 포함), 과학 교과", "recommended": "", "note": ""}, {"university": "한라대", "department": "웰니스지역공학대학", "core": "국어, 영어, 수학, 사회(역사/도덕 포함), 과학 교과", "recommended": "", "note": ""}, {"university": "충북대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "충북대", "department": "창의융합대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "한국기술교육대", "department": "공합융합계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": ""}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "공과대학", "core": "수학, 영어, 사회, 물리학, 화학, 생명과학", "recommended": "", "note": "-지리: 세계시민과 지리, 한국지리 탐구, 도시의 미래 탐구\n -역사: 세계사, 동아시아 역사기행\n -일반사회: 사회와 문화, 정치, 법과 사회, 경제, 국제관계의 이해\n -윤리: 현대사회와 윤리, 윤리와 사상, 인문학과 윤리\n -사회: 상기 지리, 역사, 일반사회, 윤리 전 과목\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "공과대학", "core": "수학, 사회, 과학", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "전주대", "department": "공과대학", "core": "국어, 영어, 대수, 미적분Ⅰ, 기하, 미적분Ⅱ, 사회, 과학, 수학, 물리학, 화학, 기술·가정, 정보, 로봇과 공학세계, 인공지능 기초, 데이터과학, 과학(진로, 융합)", "recommended": "", "note": "-국어, 영어: 1과목 이상\n-사회: 일반선택 과목, 진로선택 과목 1과목 이상\n-과학: 일반선택 과목, 진로선택 과목 2과목 이상"}, {"university": "전남대 (여수)", "department": "공과대학", "core": "수학, 물리학, 화학, 국어, 사회, 영어", "recommended": "", "note": "-물리학: 물리학, 역학과 에너지, 전자기와 양자\n -화학: 화학, 물질과 에너지, 화학 반응의 세계\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장함."}]}, {"id": "C04", "title": "화학공학·신소재", "category": "이공계", "keywords": ["화학공학", "화공", "신소재", "재료", "고분자", "나노", "배터리", "소재공학"], "summary": "화학, 물질과 에너지, 화학 반응의 세계, 미적분Ⅱ를 우선 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "화학 우선 선택"}, {"period": "2학년 2학기", "group": "D군", "advice": "기하 권장"}, {"period": "2학년 2학기", "group": "E군", "advice": "물질과 에너지 우선 선택"}, {"period": "3학년 1학기", "group": "H군", "advice": "미적분Ⅱ 선택"}, {"period": "3학년 1/2학기", "group": "I군", "advice": "화학 반응의 세계 우선 선택"}], "risks": ["B군에서 화학을 선택하지 않으면 화학공학 핵심 이수 근거가 약해질 수 있습니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어", "일반사회", "역사", "지리"], "우선선택": ["미적분Ⅱ", "물리학", "화학", "물질과 에너지", "화학 반응의 세계"], "권장선택": ["기하", "생명과학"], "확장선택": []}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "에너지환경공학과", "core": "물리학, 화학, 수학", "recommended": "", "note": "-물리학, 화학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "가톨릭대", "department": "바이오메디컬화학공학과", "core": "화학, 생명과학, 수학", "recommended": "", "note": "-화학, 생명과학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "공학", "core": "수학(대수, 미적분Ⅰ, 미적분Ⅱ, 기하), 과학(물리학)", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수 추천"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "경희대", "department": "재료/화공·고분자·에너지", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 기하, 물리학, 화학, 물질과 에너지, 역학과 에너지, 화학 반응의 세계", "recommended": "전자기와 양자, 화학 반응의 세계, 기하, 역학과 에너지", "note": ""}, {"university": "고려대", "department": "공과대학", "core": "(권장) 미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 기하", "recommended": "미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 기하", "note": "과학 교과 권장 과목 중 2과목 이상 권장"}, {"university": "광운대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학, 정보", "recommended": "기하, 미적분Ⅱ, 도시의 미래탐구, 역학과 에너지, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "융합선택 과목: 실용 통계, 수학과제 탐구, 기후변화와 지속가능한 세계, 과학의 역사와 문화, 기후변화와 환경생태, 융합과학 탐구"}, {"university": "국민대", "department": "창의공과대학", "core": "미적분Ⅰ, 물리학, 화학, 대수, 미적분Ⅱ", "recommended": "기하, 역학과 에너지, 물질과 에너지, 전자기와 양자, 미적분Ⅱ, 확률과 통계, 화학", "note": ""}, {"university": "국민대", "department": "과학기술대학", "core": "확률과 통계, 미적분Ⅰ, 화학, 생명과학, 대수, 물리학", "recommended": "미적분Ⅱ, 세포와 물질대사, 화학 반응의 세계, 생물의 유전, 역학과 에너지, 전자기와 양자, 인공지능 수학, 물질과 에너지, 기하", "note": "교과를 제시하지 않은 모집단위는 학생의 진로와 적성을 고려하여 교과목을 선택 이수할 것."}, {"university": "덕성여대", "department": "글로벌융합대학", "core": "국어, 영어, 사회(역사/도덕 포함), 제2외국어/한문 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "덕성여대", "department": "과학기술대학", "core": "수학, 과학 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "동국대", "department": "공과", "core": "수학②, 물리학, 화학", "recommended": "지구과학, 생명과학, 물리학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "동국대", "department": "첨단융합", "core": "수학②, 물리학, 화학", "recommended": "", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임."}, {"university": "동국대", "department": "열린전공학부(자연)", "core": "수학②", "recommended": "물리학, 화학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "서울과기대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "서울과기대", "department": "창의융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 화학, 화학미적분Ⅱ, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "서울대", "department": "공과대학", "core": "물리학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울대", "department": "첨단융합학부", "core": "(권장) 기하, 미적분Ⅱ, 과학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울시립대", "department": "화학공학과", "core": "수학(특히 미적분), 물리, 화학", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "융합응용화학과", "core": "화학", "recommended": "수학(특히 미적분)", "note": ""}, {"university": "서울시립대", "department": "환경공학부", "core": "수학", "recommended": "화학, 물리", "note": ""}, {"university": "서울시립대", "department": "자유전공학부(자연)", "core": "수학, 과학", "recommended": "국어, 영어", "note": ""}, {"university": "숭실대", "department": "공과대학", "core": "수학, 과학(화학) 교과 영역 이수 권장, 과학(물리학) 교과 영역 이수 권장, 과학 교과 영역 이수 권장", "recommended": "", "note": "-수학: 기하, 미적분Ⅱ 중 이수 권장\n-‘과학’으로 포괄적으로 제시된 경우 진로와 관심에 따라 교과목을 선택할 것을 권장하며, 권장 영역 외 과학 과목 이수도 의미 있게 평가에 반영함"}, {"university": "중앙대", "department": "에너지시스템공학부", "core": "미적분Ⅱ, 기하, 물리학, 화학, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "중앙대", "department": "첨단소재공학과", "core": "미적분Ⅱ, 기하, 물리학, 화학, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "중앙대", "department": "화학공학과", "core": "미적분Ⅱ, 기하, 물리학, 화학, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "중앙대", "department": "융합공학부", "core": "미적분Ⅱ, 기하, 화학, [물리학 또는 생명과학], 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "한양대", "department": "자연", "core": "미적분Ⅱ 또는 기하, 물리학/화학/생명과학 중 1과목 이상, 과학 진로선택 과목 2과목 이상", "recommended": "", "note": "진로선택 과목은 계열과 교과 위계에 맞게 선택하는 것을 권장함."}, {"university": "인하대", "department": "공과대학", "core": "물리학, 화학", "recommended": "화학, 지구과학, 물리학, 생명과학, 물리", "note": "*교과 영역은 내용 상위계가 뚜렷한 특성을 지닌 과학 교과 영역을 중심으로 안내함.\n -수학 교과: 대수, 미적분Ⅰ, 확률과 통계 교과목 이수를 권장하며, 공과대학의 경우 기하 교과목도 포함하여 이수할 것을 권장함."}, {"university": "단국대", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "아주대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한국항공대", "department": "공학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 기하", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한양대(ERICA)", "department": "공학대학", "core": "(권장) 대수, 미적분, 물리학, 화학, 지구과학, 확률과 통계, 기본수학", "recommended": "대수, 미적분, 물리학, 화학, 지구과학, 확률과 통계, 기본수학", "note": ""}, {"university": "한양대(ERICA)", "department": "공학대학 스마트융합공학부", "core": "(권장) 미적분, 확률과 통계, 물리학, 화학, 대수", "recommended": "미적분, 확률과 통계, 물리학, 화학, 대수", "note": ""}, {"university": "한양대(ERICA)", "department": "첨단융합대학 국방지능정보융합공학부", "core": "(권장) 미적분, 확률과 통계, 물리학, 지구과학", "recommended": "미적분, 확률과 통계, 물리학, 지구과학", "note": ""}, {"university": "협성대", "department": "이공대학", "core": "이공계열 적성과 진로에 따라 선택 과목 이수", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "경성대학교", "department": "자연", "core": "화학 또는 생명과학", "recommended": "미적분Ⅱ, 기하", "note": "과학 진로선택 3과목 이상 이수 권장"}, {"university": "동아대", "department": "공과대학", "core": "영어, 수학, 과학, 국어", "recommended": "", "note": ""}, {"university": "동아대", "department": "융합대학", "core": "국어, 영어, 수학, 사회, 과학", "recommended": "", "note": ""}, {"university": "부산대", "department": "공과대학", "core": "확률과 통계, 기하, 미적분Ⅱ, 물리학, 화학", "recommended": "", "note": "제시 과목 중 2과목 이상 이수"}, {"university": "경북대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 전자기와 양자, 화학 반응의 세계, 역학과 에너지, 물질과 에너지", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "과학기술대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "2과목 이상(위계에 맞게) 이수 권장"}, {"university": "영남대", "department": "재료", "core": "-일반선택: 대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학, 지구과학, 정보\n-진로선택: 기하, 미적분Ⅱ, 경제 수학, 인공지능 수학, 직무 수학, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 생활과학 탐구", "recommended": "", "note": "1순위 수학, 과학 / 2순위 영어, 국어"}, {"university": "영남대", "department": "화공·고분자·에너지", "core": "-일반선택: 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 물리학, 화학, 생명과학\n-진로선택: 기하, 미적분Ⅱ, 인공지능 수학, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 생활과학 탐구", "recommended": "", "note": "1순위 과학 / 2순위 수학 / 3순위 영어"}, {"university": "국립한밭대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "충남대", "department": "공과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "충남대", "department": "자연과학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "충남대", "department": "공학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "강원대 (춘천)", "department": "문화예술·공과대학", "core": "미적분, 기하, 물리학, 정보, 인공지능 기초, 영어 독해와 작문, 영어 발표와 토론, 화학, 확률과 통계, 지구과학, 생명과학, 융합과학 탐구, 화법과 언어, 문학, 독서와 작문, 사회와 문화", "recommended": "수학, 과학, 기술·가정/정보, 영어, 국어, 사회", "note": ""}, {"university": "강원대 (삼척·도계)", "department": "공학대학", "core": "미적분, 물리학, 화학, 영어 독해와 작문, 영어 발표와 토론, 화법과 언어, 독서와 작문, 사회와 문화, 기술․ 가정, 인간과 철학, 생태와 환경, 확률과 통계", "recommended": "영어, 수학, 과학, 국어, 사회, 기술·가정/교양", "note": ""}, {"university": "한라대", "department": "웰니스지역공학대학", "core": "국어, 영어, 수학, 사회(역사/도덕 포함), 과학 교과", "recommended": "", "note": ""}, {"university": "충북대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "충북대", "department": "창의융합대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "한국기술교육대", "department": "공합융합계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": ""}, {"university": "한국기술교육대", "department": "공합융합계열 에너지신소재화학공학부", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": ""}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "공과대학", "core": "수학, 영어, 사회, 물리학, 화학, 생명과학", "recommended": "", "note": "-지리: 세계시민과 지리, 한국지리 탐구, 도시의 미래 탐구\n -역사: 세계사, 동아시아 역사기행\n -일반사회: 사회와 문화, 정치, 법과 사회, 경제, 국제관계의 이해\n -윤리: 현대사회와 윤리, 윤리와 사상, 인문학과 윤리\n -사회: 상기 지리, 역사, 일반사회, 윤리 전 과목\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "공과대학", "core": "수학, 사회, 과학", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "공과대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "전주대", "department": "공과대학", "core": "국어, 영어, 대수, 미적분Ⅰ, 기하, 미적분Ⅱ, 사회, 과학, 수학, 물리학, 화학, 기술·가정, 정보, 로봇과 공학세계, 인공지능 기초, 데이터과학, 과학(진로, 융합)", "recommended": "", "note": "-국어, 영어: 1과목 이상\n-사회: 일반선택 과목, 진로선택 과목 1과목 이상\n-과학: 일반선택 과목, 진로선택 과목 2과목 이상"}, {"university": "전남대 (여수)", "department": "공과대학", "core": "수학, 물리학, 화학, 국어, 사회, 영어", "recommended": "", "note": "-물리학: 물리학, 역학과 에너지, 전자기와 양자\n -화학: 화학, 물질과 에너지, 화학 반응의 세계\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장함."}]}, {"id": "C05", "title": "자연과학(수학·물리·화학)", "category": "이공계", "keywords": ["자연과학", "수학과", "물리학과", "화학과", "천문", "지구과학", "순수과학", "기초과학", "수학"], "summary": "미적분Ⅱ, 기하, 물리학, 화학을 우선 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "물리학 또는 화학 우선 선택"}, {"period": "2학년 2학기", "group": "D군", "advice": "기하 우선 선택"}, {"period": "3학년 1학기", "group": "H군", "advice": "미적분Ⅱ 선택"}, {"period": "3학년 1/2학기", "group": "I군", "advice": "전자기와 양자 또는 화학 반응의 세계"}], "risks": ["D군 기하, H군 미적분Ⅱ를 선택하지 않으면 자연과학 심화 수학 이수 근거가 약해질 수 있습니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어", "일반사회", "역사", "지리"], "우선선택": ["미적분Ⅱ", "기하", "물리학", "화학"], "권장선택": ["생명과학"], "확장선택": []}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "중국언어문화학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "일어일본문화학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "프랑스어문화학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "물리학과", "core": "물리학, 수학", "recommended": "", "note": "-물리학: 과목 1과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "가톨릭대", "department": "화학과", "core": "화학, 수학", "recommended": "", "note": "-화학: 1과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "가톨릭대", "department": "수학과", "core": "수학", "recommended": "", "note": "과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "이학", "core": "수학(대수, 미적분Ⅰ, 미적분Ⅱ, 확률과 통계), 과학", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수 추천"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "경희대", "department": "수학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 기하", "recommended": "", "note": ""}, {"university": "경희대", "department": "물리", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 기하, 물리학, 역학과 에너지, 전자기와 양자", "recommended": "화학, 물질과 에너지", "note": ""}, {"university": "경희대", "department": "화학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 화학, 물질과 에너지, 화학 반응의 세계", "recommended": "기하, 물리학, 생명과학, [역학과 에너지, 전자기와 양자 중 1과목]", "note": ""}, {"university": "경희대", "department": "천문·지구", "core": "대수, 미적분Ⅰ, 확률과 통계, 지구과학, 미적분Ⅱ, 물리학, 화학, 역학과 에너지, 전자기와 양자", "recommended": "기하, [지구시스템과학, 행성우주과학 중 1과목]", "note": ""}, {"university": "고려대", "department": "이과대학", "core": "(권장) 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 지구시스템과학, 행성우주과학", "recommended": "미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 지구시스템과학, 행성우주과학", "note": ""}, {"university": "광운대", "department": "자연과학대학 (스포츠융합과학과 제외)", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "기하, 미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "융합선택 과목: 실용통계, 수학과제 탐구, 융합과학 탐구"}, {"university": "국민대", "department": "과학기술대학", "core": "확률과 통계, 미적분Ⅰ, 화학, 생명과학, 대수, 물리학", "recommended": "미적분Ⅱ, 세포와 물질대사, 화학 반응의 세계, 생물의 유전, 역학과 에너지, 전자기와 양자, 인공지능 수학, 물질과 에너지, 기하", "note": "교과를 제시하지 않은 모집단위는 학생의 진로와 적성을 고려하여 교과목을 선택 이수할 것."}, {"university": "덕성여대", "department": "글로벌융합대학", "core": "국어, 영어, 사회(역사/도덕 포함), 제2외국어/한문 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "덕성여대", "department": "과학기술대학", "core": "수학, 과학 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "동국대", "department": "이과", "core": "수학②, 물리학, 화학", "recommended": "생명과학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임."}, {"university": "동국대", "department": "열린전공학부(자연)", "core": "수학②", "recommended": "물리학, 화학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "서울과기대", "department": "창의융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 미적분Ⅱ, 기하, 역학과 에너지, 전자기와 양자, 화학, 화학미적분Ⅱ, 물질과 에너지, 화학 반응의 세계", "recommended": "", "note": ""}, {"university": "서울대", "department": "자연과학대학", "core": "물리학, 지구과학, 화학, 생명과학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울시립대", "department": "중국어문화학과", "core": "국어, 영어, 사회", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "통계학과", "core": "수학", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "물리학과", "core": "수학(미적분, 기하), 물리", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "자유전공학부(자연)", "core": "수학, 과학", "recommended": "국어, 영어", "note": ""}, {"university": "숭실대", "department": "자연과학대학", "core": "수학, 과학 교과 영역 이수 권장, 과학(물리학) 교과 영역 이수 권장, 과학(화학) 교과 영역 이수 권장, 과학(생명과학) 교과 영역 이수 권장", "recommended": "", "note": "-수학: 기하, 미적분Ⅱ 중 이수 권장\n-‘과학’으로 포괄적으로 제시된 경우 진로와 관심에 따라 교과목을 선택할 것을 권장하며, 권장 영역 외 과학 과목 이수도 의미 있게 평가에 반영함"}, {"university": "중앙대", "department": "물리학과", "core": "미적분Ⅱ, 기하, 물리학, 화학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "중앙대", "department": "수학과", "core": "미적분Ⅱ, 기하", "recommended": "", "note": ""}, {"university": "중앙대", "department": "화학과", "core": "미적분Ⅱ, 화학,  [물리학 또는 생명과학], 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "*물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전: 2과목 이상"}, {"university": "한양대", "department": "자연", "core": "미적분Ⅱ 또는 기하, 물리학/화학/생명과학 중 1과목 이상, 과학 진로선택 과목 2과목 이상", "recommended": "", "note": "진로선택 과목은 계열과 교과 위계에 맞게 선택하는 것을 권장함."}, {"university": "인하대", "department": "자연과학대학", "core": "물리학, 화학, 생명과학", "recommended": "화학, 생명과학, 지구과학", "note": "*교과 영역은 내용 상위계가 뚜렷한 특성을 지닌 과학 교과 영역을 중심으로 안내함.\n -수학 교과: 대수, 미적분Ⅰ, 확률과 통계 교과목 이수를 권장하며, 공과대학의 경우 기하 교과목도 포함하여 이수할 것을 권장함. \n권장 교과 영역을 제시하지 않은 자연계열 일부 학과 및 인문·예체능계열의 경우는 학생 개개인의 진로와 적성을 고려하여 자유롭게 이수하기를 권장함."}, {"university": "경기대", "department": "자연/공학(수학과 제외)", "core": "국어, 영어, 수학, 사회, 과학(3과목), 한국사", "recommended": "", "note": "사회, 과학 이수 과목 수 지정 관심분야 일반선택 과목 우선 이수 권장"}, {"university": "경기대", "department": "수학과", "core": "국어, 영어, 수학, 과학, 한국사", "recommended": "기하, 미적분Ⅱ 중 1과목 이수", "note": "사회, 과학 이수 과목 수 지정 관심분야 일반선택 과목 우선 이수 권장"}, {"university": "단국대", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "아주대", "department": "자연과학대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한국항공대", "department": "이학", "core": "대수, 미적분Ⅰ, 확률과 통계", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "협성대", "department": "이공대학", "core": "이공계열 적성과 진로에 따라 선택 과목 이수", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "경성대학교", "department": "자연", "core": "화학 또는 생명과학", "recommended": "미적분Ⅱ, 기하", "note": "과학 진로선택 3과목 이상 이수 권장"}, {"university": "동아대", "department": "자연과학대학", "core": "수학, 과학, 영어", "recommended": "", "note": ""}, {"university": "동아대", "department": "융합대학", "core": "국어, 영어, 수학, 사회, 과학", "recommended": "", "note": ""}, {"university": "부산대", "department": "자연과학대학", "core": "확률과 통계, 기하, 미적분Ⅱ, 화학, 생명과학, 물리학, 지구과학", "recommended": "", "note": "제시 과목 중, 2과목 이상 이수"}, {"university": "경북대", "department": "자연과학대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "과학기술대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "2과목 이상(위계에 맞게) 이수 권장"}, {"university": "영남대", "department": "수학·물리·천문·지구", "core": "-일반선택: 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 물리학, 화학, 정보\n-진로선택: 기하, 미적분Ⅱ, 경제 수학, 인공지능 수학, 직무 수학, 심화 영어, 직무 영어, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 인공지능 기초, 데이터 과학", "recommended": "", "note": "1순위 수학 / 2순위 과학 / 3순위 영어"}, {"university": "영남대", "department": "화학·생명과학·환경", "core": "-일반선택: 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 물리학, 화학, 생명과학, 정보\n-진로선택: 기하, 미적분Ⅱ, 인공지능 수학, 영미 문학 읽기, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 인공지능 기초, 데이터 과학", "recommended": "", "note": "1순위 과학 / 2순위 수학 / 3순위 영어"}, {"university": "충남대", "department": "자연과학대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학, 기하, 미적분Ⅱ", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "충남대", "department": "자연과학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "강원대 (춘천)", "department": "자연과학대학", "core": "미적분, 확률과 통계, 기하, 물리학, 생명과학, 화학, 영어 독해와 작문, 지구과학", "recommended": "수학, 과학, 영어", "note": ""}, {"university": "충북대", "department": "자연과학대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "충북대", "department": "창의융합대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "자연과학대학", "core": "수학, 물리학, 영어, 지구과학, 화학, 생명과학", "recommended": "", "note": "-물리학: 물리학, 역학과 에너지, 전자기와 양자\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "자연과학대학", "core": "수학, 과학, 사회", "recommended": "", "note": ""}]}, {"id": "C06", "title": "생명·바이오", "category": "이공계", "keywords": ["생명공학", "바이오", "생물학", "생명과학", "유전공학", "바이오테크", "제약생명", "분자생물"], "summary": "생명과학, 화학, 세포와 물질대사, 생물의 유전을 우선 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "생명과학 우선, 화학 병행 권장"}, {"period": "2학년 2학기", "group": "E군", "advice": "세포와 물질대사 우선 선택"}, {"period": "3학년 1학기", "group": "H군", "advice": "미적분Ⅱ 권장"}, {"period": "3학년 1/2학기", "group": "I군", "advice": "생물의 유전 우선 선택"}], "risks": ["E군 세포와 물질대사, I군 생물의 유전 선택이 생명·바이오 심화 이수 근거를 강화합니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어", "일반사회", "역사", "지리"], "우선선택": ["화학", "생명과학", "세포와 물질대사", "생물의 유전"], "권장선택": ["미적분Ⅱ", "물리학"], "확장선택": ["기하"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "식품영양학과", "core": "화학, 생명과학, 수학", "recommended": "", "note": "-화학, 생명과학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "가톨릭대", "department": "생명공학과", "core": "화학, 생명과학, 수학", "recommended": "", "note": "-화학, 생명과학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "가톨릭대", "department": "의생명과학과", "core": "화학, 생명과학, 수학", "recommended": "", "note": "-화학, 생명과학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "가톨릭대", "department": "바이오로직스공학부", "core": "화학, 생명과학, 수학", "recommended": "", "note": "-화학, 생명과학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "생명", "core": "수학(대수, 미적분Ⅰ, 미적분Ⅱ, 확률과 통계), 과학", "recommended": "", "note": "과학은 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수 추천"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "경희대", "department": "생명과학·환경/생활과학/농림", "core": "대수, 미적분Ⅰ, 확률과 통계, 화학, 생명과학, 세포와 물질대사, 생물과 유전, 물질과 에너지, 화학 반응의 세계", "recommended": "미적분Ⅱ, 물리학, 물질과 에너지, 화학 반응의 세계", "note": ""}, {"university": "고려대", "department": "생명과학대학", "core": "(권장) 미적분Ⅱ, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "미적분Ⅱ, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "과학 교과 권장 과목 중 2과목 이상 권장"}, {"university": "국민대", "department": "과학기술대학", "core": "확률과 통계, 미적분Ⅰ, 화학, 생명과학, 대수, 물리학", "recommended": "미적분Ⅱ, 세포와 물질대사, 화학 반응의 세계, 생물의 유전, 역학과 에너지, 전자기와 양자, 인공지능 수학, 물질과 에너지, 기하", "note": "교과를 제시하지 않은 모집단위는 학생의 진로와 적성을 고려하여 교과목을 선택 이수할 것."}, {"university": "덕성여대", "department": "글로벌융합대학", "core": "국어, 영어, 사회(역사/도덕 포함), 제2외국어/한문 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "덕성여대", "department": "과학기술대학", "core": "수학, 과학 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "동국대", "department": "이과", "core": "수학②, 물리학, 화학", "recommended": "생명과학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임."}, {"university": "동국대", "department": "바이오시스템", "core": "수학②, 화학, 생명과학, 물리학", "recommended": "지구과학, 물리학, 생명과학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "동국대", "department": "열린전공학부(자연)", "core": "수학②", "recommended": "물리학, 화학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "서울과기대", "department": "에너지바이오대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학, 미적분Ⅱ, 기하, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "서울대", "department": "농업생명과학대학", "core": "제2외국어/한문", "recommended": "기하, 미적분Ⅱ, 과학", "note": "해당 교과(군)의 일반선택, 진로선택, 융합선택 과목 중 1과목 이상"}, {"university": "서울시립대", "department": "생명과학과", "core": "생명과학", "recommended": "화학", "note": ""}, {"university": "서울시립대", "department": "환경원예학과", "core": "과학(특히 생명과학, 화학)", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "자유전공학부(자연)", "core": "수학, 과학", "recommended": "국어, 영어", "note": ""}, {"university": "서울시립대", "department": "첨단융합학부 융합바이오헬스전공", "core": "수학(특히 미적분), 화학, 생명과학", "recommended": "", "note": ""}, {"university": "중앙대", "department": "생명과학과", "core": "미적분Ⅱ, 생명과학, 화학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "*물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전: 2과목 이상"}, {"university": "중앙대", "department": "시스템생명공학과", "core": "[미적분Ⅱ 또는 기하], 생명과학, 화학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "*물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전: 2과목 이상"}, {"university": "중앙대", "department": "식품공학과(식품공학전공, 식품영양전공)", "core": "[미적분Ⅱ 또는 기하], 생명과학, 화학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "*물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전: 2과목 이상"}, {"university": "중앙대", "department": "생명자원공학부(동물생명공학전공, 식물생명공학전공)", "core": "미적분Ⅱ, 생명과학, 화학, 세포와 물질대사, 생물의 유전", "recommended": "", "note": ""}, {"university": "한양대", "department": "자연", "core": "미적분Ⅱ 또는 기하, 물리학/화학/생명과학 중 1과목 이상, 과학 진로선택 과목 2과목 이상", "recommended": "", "note": "진로선택 과목은 계열과 교과 위계에 맞게 선택하는 것을 권장함."}, {"university": "인하대", "department": "바이오시스템융합학부", "core": "생명과학", "recommended": "화학", "note": "*교과 영역은 내용 상위계가 뚜렷한 특성을 지닌 과학 교과 영역을 중심으로 안내함.\n -수학 교과: 대수, 미적분Ⅰ, 확률과 통계 교과목 이수를 권장하며, 공과대학의 경우 기하 교과목도 포함하여 이수할 것을 권장함."}, {"university": "단국대", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "아주대", "department": "첨단바이오융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한양대(ERICA)", "department": "첨단융합대학 바이오신약융합학부", "core": "(권장) 화학, 생명과학, 미적분, 확률과 통계", "recommended": "화학, 생명과학, 미적분, 확률과 통계", "note": ""}, {"university": "협성대", "department": "이공대학", "core": "이공계열 적성과 진로에 따라 선택 과목 이수", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "경성대학교", "department": "자연", "core": "화학 또는 생명과학", "recommended": "미적분Ⅱ, 기하", "note": "과학 진로선택 3과목 이상 이수 권장"}, {"university": "동아대", "department": "생명자원과학대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "동아대", "department": "융합대학", "core": "국어, 영어, 수학, 사회, 과학", "recommended": "", "note": ""}, {"university": "부산대", "department": "생명자원과학대학", "core": "화학, 생명과학, 기하, 미적분Ⅱ, 물리학", "recommended": "", "note": "제시 과목 관련 일반선택 과목 및 진로선택 과목 중 3과목 이상 이수\n-화학 관련 과목: 화학, 물질과 에너지, 화학 반응의 세계\n-생명과학 관련 과목: 생명과학, 세포와 물질대사, 생물의 유전"}, {"university": "부산대", "department": "정보의생명공학대학", "core": "물리학, 화학, 생명과학", "recommended": "", "note": "제시 과목 관련 일반선택 과목 및 진로선택 과목 중 1과목 이상 이수\n-물리학 관련 과목: 물리학, 역학과 에너지, 전자기와 양자\n-화학 관련 과목: 화학, 물질과 에너지, 화학 반응의 세계\n-생명과학 관련 과목: 생명과학, 세포와 물질대사, 생물의 유전"}, {"university": "경북대", "department": "농업생명과학대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 물질과 에너지, 경제수학", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "생태환경대학", "core": "생명과학, 화학", "recommended": "세포와 물질대사, 생물의 유전", "note": "2과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "과학기술대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 기하, 인공지능 수학, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "2과목 이상(위계에 맞게) 이수 권장"}, {"university": "영남대", "department": "농림·수산", "core": "-일반선택: 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 물리학, 화학, 생명과학, 정보\n-진로 선택: 미적분Ⅱ, 인공지능 수학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 생활과학 탐구, 인공지능 기초, 데이터 과학", "recommended": "", "note": "1순위 과학 / 2순위 영어 / 3순위 국어"}, {"university": "영남대", "department": "생활과학", "core": "-일반선택: 화법과 언어, 독서와 작문, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 화학, 생명과학, 사회와 문화, 현대사회와 윤리, 미술, 기술가정, 정보, 생태와 환경\n-진로선택: 주제 탐구 독서, 인공지능 수학, 영어 발표와 토론, 세포와 물질대사, 생물의 유전, 미술 창작, 미술 감상과 비평, 생활과학 탐구, 인공지능 기초, 데이터 과학, 인간과 심리, -일반 선택: 화법과 언어, 독서와 작문, 확률과 통계, 영어 독해와 작문, 사회와 문화, 현대사회와 윤리, 생태와 환경\n-진로 선택: 주제 탐구 독서, 인공지능 수학, 영어 발표와 토론, 세포와 물질대사, 생물의 유전, 미술 창작, 미술 감상과 비평, 생활과학 탐구, 인공지능 기초, 데이터 과학, 인간과 심리", "recommended": "", "note": "1순위 사회 / 2순위 과학 / 3순위 국어, 수학"}, {"university": "충남대", "department": "생명시스템과학대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 화학,생명과학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "*물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전: 2과목 이상"}, {"university": "충남대", "department": "자연과학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "충남대", "department": "영농창업인재전형 농업생명과학대학", "core": "영어, 사회(역사/도덕 포함), 확률과 통계, 대수, 미적분Ⅰ, 과학", "recommended": "", "note": "-영어, 사회: 각 교과별 2과목 이상"}, {"university": "충남대", "department": "농업생명과학대학(농업경제학과 진로희망자 제외)", "core": "대수, 미적분Ⅰ, 확률과 통계, 기하, 미적분Ⅱ, 과학", "recommended": "", "note": "*기하, 미적분Ⅱ: 적성과 진로에 맞게 이수\n -과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "충남대", "department": "농업생명과학대학", "core": "영어, 사회(역사/도덕 포함), 확률과 통계", "recommended": "", "note": "-영어, 사회: 각 교과별 2과목 이상"}, {"university": "강원대 (춘천)", "department": "농업생명과학대학", "core": "생명과학, 화학, 영어Ⅰ, 영어Ⅱ, 영어독해와 작문, 미적분Ⅰ, 물리학, 확률과 통계, 사회와 문화, 지구과학", "recommended": "과학, 영어, 수학, 국어, 사회", "note": ""}, {"university": "강원대 (춘천)", "department": "동물생명과학대학", "core": "영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 확률과 통계, 생명과학, 화학, 영어 발표와 토론", "recommended": "영어, 수학, 과학", "note": ""}, {"university": "강원대 (춘천)", "department": "산림환경과학대학", "core": "화법과 언어, 독서와 작문, 영어 독해와 작문, 생명과학, 확률과 통계, 물리학, 화학, 지구과학, 한국지리 탐구, 도시의 미래 탐구", "recommended": "국어, 영어, 과학, 수학, 사회", "note": ""}, {"university": "강원대 (춘천)", "department": "의생명과학대학", "core": "생명과학, 화학, 영어 발표와 토론, 미적분", "recommended": "영어, 과학, 수학", "note": ""}, {"university": "한라대", "department": "웰니스지역공학대학", "core": "국어, 영어, 수학, 사회(역사/도덕 포함), 과학 교과", "recommended": "", "note": ""}, {"university": "한라대", "department": "미래라이프융합대학", "core": "국어, 영어, 수학, 사회(역사/도덕 포함), 과학 교과", "recommended": "", "note": ""}, {"university": "충북대", "department": "농업생명환경대학", "core": "영어, 수학, 과학", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "농업생명과학대학", "core": "영어, 화학, 생명과학, 수학, 지구과학(행성우주과학 불요), 물리학, 사회", "recommended": "", "note": "-화학: 화학, 물질과 에너지, 화학 반응의 세계\n -생명과학: 생명과학, 세포와 물질대사, 생물의 유전\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "농업생명과학대학", "core": "영어, 과학, 수학", "recommended": "", "note": ""}, {"university": "전북대", "department": "환경생명자원대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "전주대", "department": "반려동물산업학부", "core": "영어1, 영어2", "recommended": "", "note": ""}, {"university": "전남대 (여수)", "department": "수산해양대학", "core": "영어, 생명과학, 지구과학(행성우주과학 불요), 수학, 물리학, 화학", "recommended": "", "note": "-생명과학: 생명과학, 세포와 물질대사, 생물의 유전\n -지구과학: 지구과학, 지구시스템과학, 행성우주과학\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장함."}]}, {"id": "C07", "title": "의예·치의예·한의예", "category": "의약계", "keywords": ["의대", "의사", "의예", "치의예", "한의예", "의학", "치과", "한의", "의과대학"], "summary": "생명과학, 화학, 세포와 물질대사, 생물의 유전을 우선 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "생명과학·화학 모두 확인"}, {"period": "2학년 2학기", "group": "E군", "advice": "세포와 물질대사 우선 선택"}, {"period": "3학년 1학기", "group": "H군", "advice": "미적분Ⅱ 권장"}, {"period": "3학년 1/2학기", "group": "I군", "advice": "생물의 유전 우선 선택"}], "risks": ["생명과학과 화학 모두 이수 근거를 갖추는 것이 강력히 권장됩니다.", "세포와 물질대사(E군), 생물의 유전(I군) 선택이 의예 계열 심화 이수 근거를 크게 강화합니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어", "일반사회", "역사", "지리"], "우선선택": ["화학", "생명과학", "세포와 물질대사", "생물의 유전"], "권장선택": ["미적분Ⅱ", "물리학"], "확장선택": ["기하"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "의예과", "core": "화학, 생명과학, 수학", "recommended": "", "note": "-세포와 물질대사, 생물과 유전 포함 3과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "경희대", "department": "의학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 화학, 생명과학, [물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전 중 3과목], 생물의 유전", "recommended": "물리학, [물질과 에너지, 화학 반응의 세계 중 1과목]", "note": ""}, {"university": "고려대", "department": "의과대학", "core": "(권장) 미적분Ⅱ, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "미적분Ⅱ, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "과학 교과 권장 과목 중 2과목 이상 권장"}, {"university": "동국대", "department": "열린전공학부(자연)", "core": "수학②", "recommended": "물리학, 화학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "서울대", "department": "수의과대학", "core": "(권장) 기하, 미적분Ⅱ, 과학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울대", "department": "의과대학", "core": "생명과학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 세포와 물질대사, 생물의 유전을 포함하여 3과목 이상"}, {"university": "서울대", "department": "치의학대학원", "core": "(권장) 기하 또는 미적분Ⅱ, 과학", "recommended": "기하 또는 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울시립대", "department": "자유전공학부(자연)", "core": "수학, 과학", "recommended": "국어, 영어", "note": ""}, {"university": "중앙대", "department": "의학부", "core": "미적분Ⅱ, 기하, 생명과학, 화학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "*물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전: 3과목 이상"}, {"university": "한양대", "department": "자연", "core": "미적분Ⅱ 또는 기하, 물리학/화학/생명과학 중 1과목 이상, 과학 진로선택 과목 2과목 이상", "recommended": "", "note": "진로선택 과목은 계열과 교과 위계에 맞게 선택하는 것을 권장함."}, {"university": "인하대", "department": "의과대학", "core": "생명과학", "recommended": "화학", "note": "*교과 영역은 내용 상위계가 뚜렷한 특성을 지닌 과학 교과 영역을 중심으로 안내함.\n -수학 교과: 대수, 미적분Ⅰ, 확률과 통계 교과목 이수를 권장하며, 공과대학의 경우 기하 교과목도 포함하여 이수할 것을 권장함."}, {"university": "단국대", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "아주대", "department": "의과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "경성대학교", "department": "자연", "core": "화학 또는 생명과학", "recommended": "미적분Ⅱ, 기하", "note": "과학 진로선택 3과목 이상 이수 권장"}, {"university": "동아대", "department": "의과대학", "core": "국어, 영어, 수학, 과학", "recommended": "", "note": ""}, {"university": "부산대", "department": "의과대학", "core": "화학, 생명과학", "recommended": "", "note": "제시 과목 관련 일반선택 과목 및 진로선택 과목 중 3과목 이상 이수"}, {"university": "부산대", "department": "치과대학", "core": "화학, 생명과학", "recommended": "", "note": "제시 과목 관련 일반선택 과목 및 진로선택 과목 중 3과목 이상 이수"}, {"university": "부산대", "department": "한의학전문대학원", "core": "화학, 생명과학", "recommended": "", "note": "제시 과목 관련 일반선택 과목 및 진로선택 과목 중 3과목 이상 이수"}, {"university": "경북대", "department": "의과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 화학 반응의 세계, 물질과 에너지, 세포와 물질대사, 생물의 유전", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "치과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 화학 반응의 세계, 물질과 에너지, 세포와 물질대사, 생물의 유전", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "수의과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 화학 반응의 세계, 물질과 에너지, 세포와 물질대사, 생물의 유전", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "충남대", "department": "의과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 기하, 미적분Ⅱ, 화학, 생명과학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "-물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전 중 2과목 이상"}, {"university": "충남대", "department": "수의과대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 기하, 미적분Ⅱ, 화학, 생명과학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "-물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전 중 2과목 이상"}, {"university": "충남대", "department": "자연과학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "강원대 (춘천)", "department": "수의과대학", "core": "영어 독해와 작문, 영어 발표와 토론, 확률과 통계, 미적분, 생명과학, 화학", "recommended": "영어, 수학, 과학", "note": ""}, {"university": "강원대 (춘천)", "department": "의과대학", "core": "확률과 통계, 미적분, 생명과학, 화학", "recommended": "국어, 영어, 수학, 과학", "note": ""}, {"university": "건국대 (글로컬)", "department": "의예과", "core": "수학, 과학", "recommended": "", "note": "-수학: 대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 기하 중 4과목 이상\n -과학: 생명과학, 세포와 물질대사, 생물의 유전 포함하여 3과목 이상"}, {"university": "충북대", "department": "수의과대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "충북대", "department": "의과대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "수의과대학", "core": "영어, 화학, 생명과학", "recommended": "", "note": "-화학: 화학, 물질과 에너지, 화학 반응의 세계\n -생명과학: 생명과학, 세포와 물질대사, 생물의 유전\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "의과대학", "core": "수학, 영어, 생명과학", "recommended": "", "note": "-생명과학: 생명과학, 세포와 물질대사, 생물의 유전\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "전남대 (광주)", "department": "치의학전문대학원(학석사통합과정)", "core": "수학, 화학, 생명과학", "recommended": "", "note": "-화학: 화학, 물질과 에너지, 화학 반응의 세계\n -생명과학: 생명과학, 세포와 물질대사, 생물의 유전\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "조선대", "department": "의과대학", "core": "수학, 과학, 영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "치과대학", "core": "수학, 과학", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "수의과대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "전북대", "department": "의과대학", "core": "수학, 영어", "recommended": "", "note": ""}, {"university": "전북대", "department": "치과대학", "core": "수학, 과학", "recommended": "", "note": ""}, {"university": "전주대", "department": "의과학대학", "core": "국어, 수학, 영어, 과학, 대수, 미적분Ⅰ, 확률과 통계, 기하, 미적분Ⅱ, 인공지능 수학, 물리학, 화학, 생명과학, 역학과 에너지, 전자기와 양자, 화학 반응의 세계, 세포와 물질대사, 과학과제 탐구, 사회, 교양, 체육", "recommended": "", "note": "2과목 이상"}]}, {"id": "C08", "title": "약학", "category": "의약계", "keywords": ["약학", "약대", "제약", "신약", "약사", "약학과"], "summary": "화학, 생명과학, 화학 반응의 세계를 우선 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "화학 우선, 생명과학 병행"}, {"period": "2학년 2학기", "group": "E군", "advice": "세포와 물질대사 권장"}, {"period": "3학년 1학기", "group": "H군", "advice": "미적분Ⅱ 권장"}, {"period": "3학년 1/2학기", "group": "I군", "advice": "화학 반응의 세계 우선 선택"}], "risks": ["B군에서 화학을 선택하지 않으면 약학 핵심 이수 근거가 약해질 수 있습니다.", "I군에서 화학 반응의 세계 선택이 약학 심화 연계 근거를 강화합니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어", "일반사회", "역사", "지리"], "우선선택": ["화학", "생명과학", "화학 반응의 세계"], "권장선택": ["미적분Ⅱ", "세포와 물질대사"], "확장선택": ["기하", "물리학"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "약학과", "core": "화학, 생명과학, 수학", "recommended": "", "note": "-화학, 생명과학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "경희대", "department": "약학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 화학, 생명과학, [물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전 중 3과목]", "recommended": "물리학", "note": ""}, {"university": "덕성여대", "department": "약학대학", "core": "수학, 과학(화학/생명과학 포함) 교과 적극 이수", "recommended": "", "note": "-모집단위와 관계없이 기초학습역량을 위해 국어, 영어, 수학의 일반 선택 과목을 성실하게 이수하는 것을 권장함.\n-교과별 과목의 학습위계를 고려하여 선택 과목을 이수하는 것을 권장함."}, {"university": "동국대", "department": "약학", "core": "수학②, 화학, 생명과학", "recommended": "물리학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "동국대", "department": "열린전공학부(자연)", "core": "수학②", "recommended": "물리학, 화학", "note": "-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-과학 교과의 역량영역은 동국대 기준 교과 영역별 일반 선택 과목 이수 후 진로 선택 1과목 이상 이수 권장."}, {"university": "서울대", "department": "약학대학", "core": "화학 또는 생명과학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "서울시립대", "department": "자유전공학부(자연)", "core": "수학, 과학", "recommended": "국어, 영어", "note": ""}, {"university": "중앙대", "department": "약학부", "core": "미적분Ⅱ, 기하, 생명과학, 화학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "*물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전: 3과목 이상"}, {"university": "한양대", "department": "자연", "core": "미적분Ⅱ 또는 기하, 물리학/화학/생명과학 중 1과목 이상, 과학 진로선택 과목 2과목 이상", "recommended": "", "note": "진로선택 과목은 계열과 교과 위계에 맞게 선택하는 것을 권장함."}, {"university": "단국대", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "아주대", "department": "약학대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "한양대(ERICA)", "department": "약학대학", "core": "(권장) 화학, 생명과학", "recommended": "화학, 생명과학", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "경성대학교", "department": "자연", "core": "화학 또는 생명과학", "recommended": "미적분Ⅱ, 기하", "note": "과학 진로선택 3과목 이상 이수 권장"}, {"university": "부산대", "department": "약학부", "core": "화학, 생명과학", "recommended": "", "note": "제시 과목 관련 일반선택 과목 및 진로선택 과목 중 3과목 이상 이수"}, {"university": "경북대", "department": "약학대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 물리학, 화학, 생명과학", "recommended": "미적분Ⅱ, 화학 반응의 세계, 물질과 에너지, 세포와 물질대사, 생물의 유전", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "영남대", "department": "의약학", "core": "-일반선택: 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 물리학, 화학, 생명과학, 현대사회와 윤리\n-진로선택: 기하, 미적분Ⅱ, 심화 영어, 영어 발표와 토론, 심화 영어 독해와 작문, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 윤리와 사상, 인문학과 윤리", "recommended": "", "note": "1순위 과학 / 2순위 수학 / 3순위 영어"}, {"university": "충남대", "department": "약학대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 기하, 미적분Ⅱ, 화학, 생명과학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "-물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전 중 2과목 이상"}, {"university": "충남대", "department": "자연과학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "강원대 (춘천)", "department": "약학대학", "core": "확률과 통계, 미적분, 생명과학, 화학", "recommended": "수학, 과학", "note": ""}, {"university": "충북대", "department": "약학대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "약학대학", "core": "수학, 화학, 생명과학", "recommended": "", "note": "-화학: 화학, 물질과 에너지, 화학 반응의 세계\n -생명과학: 생명과학, 세포와 물질대사, 생물의 유전\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "약학대학", "core": "수학, 과학", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "원광대", "department": "의약학계열", "core": "대수, 미적분Ⅰ, 미적분Ⅱ, 기하, 확률과 통계, 화학, 생명과학, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "", "note": ""}, {"university": "전북대", "department": "약학대학", "core": "과학", "recommended": "", "note": ""}, {"university": "전남대 (여수)", "department": "조기취업형계약학과", "core": "수학, 물리학", "recommended": "", "note": "-물리학: 물리학, 역학과 에너지, 전자기와 양자\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장함."}]}, {"id": "C09", "title": "간호·보건", "category": "의약계", "keywords": ["간호", "간호학", "보건", "임상병리", "방사선", "물리치료", "작업치료", "보건의료", "간호사"], "summary": "생명과학, 화학을 우선 선택하고 세포와 물질대사를 권장합니다.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "생명과학 우선, 화학 병행"}, {"period": "2학년 2학기", "group": "E군", "advice": "세포와 물질대사 권장"}, {"period": "3학년 1학기", "group": "H군", "advice": "미적분Ⅱ 권장"}], "risks": ["생명과학과 화학 이수 근거를 갖추는 것이 권장됩니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어", "일반사회", "역사", "지리"], "우선선택": ["화학", "생명과학"], "권장선택": ["미적분Ⅱ", "물리학", "세포와 물질대사"], "확장선택": ["기하"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "간호학과", "core": "화학, 생명과학, 수학", "recommended": "", "note": "-화학, 생명과학: 2과목 이상\n-수학: 과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "경희대", "department": "간호/보건", "core": "대수, 미적분Ⅰ,확률과 통계,생명과학,세포와 물질대사,생물의 유전", "recommended": "미적분Ⅱ, 화학, 물질과 에너지, 화학 반응의 세계", "note": ""}, {"university": "고려대", "department": "간호대학", "core": "(권장) 미적분Ⅱ, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "미적분Ⅱ, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "과학 교과 권장 과목 중 2과목 이상 권장"}, {"university": "고려대", "department": "보건과학대학", "core": "(권장) 미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "recommended": "미적분Ⅱ, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전", "note": "과학 교과 권장 과목 중 2과목 이상 권장"}, {"university": "서울대", "department": "생활과학대학", "core": "제2외국어/한문", "recommended": "기하, 미적분Ⅱ, 과학", "note": "해당 교과(군)의 일반선택, 진로선택, 융합선택 과목 중 1과목 이상"}, {"university": "서울대", "department": "간호대학", "core": "(권장) 기하 또는 미적분Ⅱ, 과학", "recommended": "기하 또는 미적분Ⅱ, 과학", "note": "과학 교과의 진로선택 과목 중 3과목 이상"}, {"university": "중앙대", "department": "간호학과", "core": "미적분Ⅱ, 생명과학, 세포와 물질대사, 생물의 유전", "recommended": "", "note": ""}, {"university": "한양대", "department": "자연", "core": "미적분Ⅱ 또는 기하, 물리학/화학/생명과학 중 1과목 이상, 과학 진로선택 과목 2과목 이상", "recommended": "", "note": "진로선택 과목은 계열과 교과 위계에 맞게 선택하는 것을 권장함."}, {"university": "인하대", "department": "간호대학", "core": "생명과학", "recommended": "화학", "note": "*교과 영역은 내용 상위계가 뚜렷한 특성을 지닌 과학 교과 영역을 중심으로 안내함.\n -수학 교과: 대수, 미적분Ⅰ, 확률과 통계 교과목 이수를 권장하며, 공과대학의 경우 기하 교과목도 포함하여 이수할 것을 권장함."}, {"university": "단국대", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "아주대", "department": "간호대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 과학", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목(미적분Ⅱ) 이수\n -과학: 과학 관련 일반선택 과목 먼저 이수 후, 진로와 적성에 맞게 진로선택 과목 이수"}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "경성대학교", "department": "자연", "core": "화학 또는 생명과학", "recommended": "미적분Ⅱ, 기하", "note": "과학 진로선택 3과목 이상 이수 권장"}, {"university": "동아대", "department": "건강과학대학", "core": "영어, 과학, 수학, 국어", "recommended": "", "note": ""}, {"university": "동아대", "department": "간호대학", "core": "국어, 영어, 수학, 과학", "recommended": "", "note": ""}, {"university": "부산대", "department": "생활과학대학", "core": "화학, 생명과학", "recommended": "", "note": "제시 과목 관련 일반선택 과목 및 진로선택 과목 중 3과목 이상 이수\n-화학 관련 과목: 화학, 물질과 에너지, 화학 반응의 세계\n-생명과학 관련 과목: 생명과학, 세포와 물질대사, 생물의 유전"}, {"university": "부산대", "department": "간호대학", "core": "화학, 생명과학", "recommended": "", "note": "제시 과목 관련 일반선택 과목 및 진로선택 과목 중 3과목 이상 이수"}, {"university": "경북대", "department": "생활과학대학", "core": "생명과학, 화학", "recommended": "세포와 물질대사, 생물의 유전, 물질과 에너지, 화학 반응의 세계", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "경북대", "department": "간호대학", "core": "생명과학, 화학", "recommended": "세포와 물질대사, 생물의 유전, 화학 반응의 세계", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "충남대", "department": "생활과학대학", "core": "영어, 대수, 미적분Ⅰ, 확률과 통계, 과학", "recommended": "", "note": "2과목 이상"}, {"university": "충남대", "department": "간호대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 생명과학, 세포와 물질대사, 생물의 유전", "recommended": "", "note": "*세포와 물질대사, 생물의 유전 중 1과목 이상"}, {"university": "충남대", "department": "자연과학융합학부", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로선택 과목 1과목 이상"}, {"university": "강원대 (춘천)", "department": "간호대학", "core": "생명과학", "recommended": "영어, 수학, 과학", "note": ""}, {"university": "강원대 (삼척·도계)", "department": "보건과학대학", "core": "생명과학, 화학, 생활과학 탐구, 보건, 영어 독해와 작문, 확률과 통계, 영어 발표와 토론, 인문학과 윤리, 물리학, 기하", "recommended": "과학, 기술·가정/교양, 영어, 수학, 사회, 기술․가정", "note": ""}, {"university": "한라대", "department": "웰니스지역공학대학", "core": "국어, 영어, 수학, 사회(역사/도덕 포함), 과학 교과", "recommended": "", "note": ""}, {"university": "한라대", "department": "미래라이프융합대학", "core": "국어, 영어, 수학, 사회(역사/도덕 포함), 과학 교과", "recommended": "", "note": ""}, {"university": "충북대", "department": "생활과학대학", "core": "국어, 사회(역사/도덕 포함), 수학, 과학", "recommended": "", "note": ""}, {"university": "충북대", "department": "간호대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "자연계열", "core": "국어, 수학, 영어, 과학", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "간호대학", "core": "영어, 수학, 과학", "recommended": "", "note": "-물리학: 물리학, 역학과 에너지, 전자기와 양자\n -화학: 화학, 물질과 에너지, 화학 반응의 세계\n -생명과학: 생명과학, 세포와 물질대사, 생물의 유전\n -지구과학: 지구과학, 지구시스템과학, 행성우주과학\n - 과학: 상기 물리학, 화학, 생명과학, 지구과학 전 과목\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "생활과학대학", "core": "국어, 영어, 사회, 화학, 생명과학, 기술·가정/정보", "recommended": "", "note": "-지리: 세계시민과 지리, 한국지리 탐구, 도시의 미래 탐구\n -역사: 세계사, 동아시아 역사기행\n -일반사회: 사회와 문화, 정치, 법과 사회, 경제, 국제관계의 이해\n -윤리: 현대사회와 윤리, 윤리와 사상, 인문학과 윤리\n -사회: 상기 지리, 역사, 일반사회, 윤리 전 과목\n -화학: 화학, 물질과 에너지, 화학 반응의 세계\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "간호대학", "core": "영어, 과학", "recommended": "", "note": ""}, {"university": "전북대", "department": "생활과학대학", "core": "영어", "recommended": "", "note": ""}]}, {"id": "C10", "title": "법학·행정·정치", "category": "인문사회", "keywords": ["법학", "법대", "행정", "정치", "경찰", "공무원", "행정학", "정치학", "외교", "국제관계"], "summary": "사회 계열 과목을 고루 이수하고 논술·글쓰기 역량을 강화하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "세계사·현대사회와 윤리 중 선택"}, {"period": "2학년 2학기", "group": "D군", "advice": "독서 토론과 글쓰기 권장"}, {"period": "2학년 2학기", "group": "E군", "advice": "정치 또는 윤리와 사상 선택"}], "risks": ["사회 계열 선택과목을 다양하게 구성하면 법·행정·정치 계열 연계 근거가 강화됩니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어"], "우선선택": ["세계시민과 지리", "세계사", "현대사회와 윤리"], "권장선택": ["주제탐구독서", "영어 발표와 토론", "경제 수학"], "확장선택": ["사회문제 탐구", "법과 사회", "정치"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "법학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "행정학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수[수학(확률과 통계) 포함]", "recommended": "", "note": ""}, {"university": "건국대", "department": "인문", "core": "국어, 영어, 사회", "recommended": "", "note": "일반선택 과목을 먼저 이수하고, 진로 적성에 맞게 진로선택 과목 및 융합선택 과목 이수를 추천"}, {"university": "건국대", "department": "사회과학", "core": "국어, 사회, 수학(대수, 미적분Ⅰ, 확률과 통계)", "recommended": "", "note": ""}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "광운대", "department": "정책법학대학", "core": "화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 사화와 문화, 현대사회와 윤리, 한문", "recommended": "주제 탐구 독서, 문학과 영상, 영어 발표와 토론, 정치, 법과 사회, 경제, 윤리와 사상, 현대사회와 윤리", "note": "융합선택 과목: 독서 토론과 글쓰기, 매체 의사소통, 실생활 영어 회화, 사회문제 탐구"}, {"university": "동국대", "department": "문과", "core": "역사, 일반사회, 국어, 영어, 일본어, 중국어, 윤리", "recommended": "한문, 역사, 일반사회, 교양, 지리, 윤리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "법과", "core": "국어, 일반사회", "recommended": "윤리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "사회과학", "core": "일반사회", "recommended": "역사, 윤리, 지리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "경찰사법", "core": "수학①, 일반사회", "recommended": "역사, 윤리, 지리", "note": "-수학① 진로선택 과목: 미적분Ⅱ, 경제수학\n-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학② 진로선택 과목: 미적분Ⅱ, 기하, 인공지능\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "열린전공학부(인문)", "core": "국어, 영어", "recommended": "일반사회, 역사, 윤리, 지리, 제2외국어", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "서울시립대", "department": "행정학과", "core": "국어, 영어, 수학, 사회", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "국제관계학과", "core": "국어, 영어, 사회", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "도시행정학과", "core": "국어, 영어, 수학, 사회", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "자유전공학부(인문)", "core": "국어, 영어, 사회", "recommended": "", "note": ""}, {"university": "숭실대", "department": "법과대학", "core": "국어, 영어, 사회 교과 영역 이수 권장", "recommended": "", "note": ""}, {"university": "중앙대", "department": "사회기반시스템공학부 도시시스템공학전공", "core": "미적분Ⅱ, 기하, 물리학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "경기대", "department": "인문/예체능", "core": "국어, 영어, 수학, 사회(2과목), 과학, 한국사", "recommended": "", "note": "사회, 과학 이수 과목 수 지정 관심분야 일반선택 과목 우선 이수 권장"}, {"university": "단국대", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "한국항공대", "department": "사회", "core": "대수, 미적분Ⅰ, 확률과 통계", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "동아대", "department": "국제대학", "core": "영어, 수학, 사회, 국어", "recommended": "", "note": ""}, {"university": "영남대", "department": "인문학", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 한국지리 탐구, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 인공지능 기초, 인간과 철학, 논리와 사고, 삶과 종교", "recommended": "", "note": "1순위 국어 / 2순위 영어, 사회 / 3순위 수학"}, {"university": "영남대", "department": "사회과학", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 한국지리 탐구, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 인공지능 기초, 인간과 철학, 논리와 사고, 삶과 종교, 대수, 확률과 통계, 미적분Ⅰ, 현대사회와 윤리, 생명과학, 체육1, 체육2, 기술가정, 정보, 한문, 진로와 직업, 생태환경\n-진로선택: 주제탐구 독서, 경제 수학, 인공지능 수학, 세포와 물질대사, 생물의 유전, 운동과 건강, 생활과학 탐구, 데이터 과학, 인간과 심리, 교육의 이해, 보건", "recommended": "", "note": "1순위 국어, 사회 / 2순위, 영어 / 3순위 수학"}, {"university": "국립한밭대", "department": "인문사회대학", "core": "영어, 사회(역사/도덕 포함)", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "충남대", "department": "국가안보융합학부", "core": "국어, 영어, 사회", "recommended": "", "note": "-국어, 영어, 사회: 2"}, {"university": "충남대", "department": "사회과학대학(사회학과, 심리학과, 사회복지학과, 행정학부 제외)", "core": "국어, 영어, 사회", "recommended": "", "note": "-국어, 영어, 사회: 2"}, {"university": "강원대 (삼척·도계)", "department": "인문사회대학", "core": "확률과 통계, 미적분, 사회와 문화, 경제, 법과 사회 정치, 화법과 언어, 독서와 작문, 여행지리, 영어 독해와 작문, 영어 발표와 토론, 영미 문학 읽기, 세계 문화와 영어, 정치, 법과 사회, 윤리와 사상, 인간과 철학, 인간과 심리, 문학, 교육학, 동아시아 역사 기행, 일본어, 심화일본어, 일본어 회화", "recommended": "영어, 수학, 사회, 국어, 교양, 제2외국어/한문", "note": ""}, {"university": "단국대 (천안)", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "자연과학·공공보건안전대학", "core": "과학, 영어, 사회, 국어, 수학", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "법사회대학", "core": "국어, 사회, 영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}]}, {"id": "C11", "title": "경영·경제", "category": "인문사회", "keywords": ["경영", "경제", "경영학", "경제학", "무역", "회계", "마케팅", "금융", "상경"], "summary": "대수·확률과 통계(자동이수) 기반으로, 경제·경제 수학을 권장 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "사회와 문화 또는 세계사"}, {"period": "2학년 2학기", "group": "E군", "advice": "경제 선택 권장"}, {"period": "3학년 1학기", "group": "H군", "advice": "경제 수학 선택 권장"}], "risks": ["경제(E군)와 경제 수학(H군) 선택이 경영·경제 계열 진로 연계 근거를 강화합니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어"], "우선선택": ["경제 수학", "실용 통계"], "권장선택": ["세계시민과 지리", "현대사회와 윤리", "영어 발표와 토론"], "확장선택": ["주제탐구독서", "사회문제 탐구", "경영·경제"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "인문사회계열", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "경영학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수[수학(확률과 통계) 포함]", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "회계학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수[수학(확률과 통계) 포함]", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "경제학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수[수학(확률과 통계) 포함]", "recommended": "", "note": ""}, {"university": "건국대", "department": "인문", "core": "국어, 영어, 사회", "recommended": "", "note": "일반선택 과목을 먼저 이수하고, 진로 적성에 맞게 진로선택 과목 및 융합선택 과목 이수를 추천"}, {"university": "건국대", "department": "사회과학", "core": "국어, 사회, 수학(대수, 미적분Ⅰ, 확률과 통계)", "recommended": "", "note": ""}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "광운대", "department": "경영대학", "core": "화법과 언어, 독서와 작문, 문학, 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 사회와 문화, 현대사회와 윤리, 제2외국어 과목, 제3외국어 과목", "recommended": "기하, 경제 수학, 인공지능 수학, 영어 발표와 토론, 법과 사회, 경제, 윤리와 사상, 국제 관계의 이해", "note": "융합선택 과목: 수학과제 탐구, 실용 통계, 실생활 영어 회화, 사회문제 탐구, 금융과 경제생활"}, {"university": "국민대", "department": "경상대학", "core": "미적분Ⅰ 또는 확률과 통계", "recommended": "경제 수학 또는 경제", "note": ""}, {"university": "국민대", "department": "경영대학", "core": "확률과 통계", "recommended": "경제 수학, 미적분Ⅰ", "note": ""}, {"university": "동국대", "department": "문과", "core": "역사, 일반사회, 국어, 영어, 일본어, 중국어, 윤리", "recommended": "한문, 역사, 일반사회, 교양, 지리, 윤리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "사회과학", "core": "일반사회", "recommended": "역사, 윤리, 지리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "경영", "core": "수학①, 영어", "recommended": "일반사회", "note": "-수학① 진로선택 과목: 미적분Ⅱ, 경제수학\n-수학①,② 일반선택 과목: 대수, 미적분Ⅰ, 확률과 통계\n-수학①,② 융합선택 과목: 수학과 문화, 실용 통계, 수학과제 탐구\n-계열 특성에 따라 수학 및 과학 역량이 기초 학업 역량이자 전공 수학 역량임.\n-기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "열린전공학부(인문)", "core": "국어, 영어", "recommended": "일반사회, 역사, 윤리, 지리, 제2외국어", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "서울과기대", "department": "기술경영융합대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 미적분Ⅱ, 물리학, 기하, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "서울대", "department": "경영대학", "core": "제2외국어/한문", "recommended": "", "note": "해당 교과(군)의 일반선택, 진로선택, 융합선택 과목 중 1과목 이상"}, {"university": "서울시립대", "department": "경제학부", "core": "수학", "recommended": "영어, 사회", "note": ""}, {"university": "서울시립대", "department": "세무학과", "core": "국어, 영어, 수학, 사회", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "경영학부", "core": "수학, 영어", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "자유전공학부(인문)", "core": "국어, 영어, 사회", "recommended": "", "note": ""}, {"university": "숭실대", "department": "경제통상대학", "core": "국어, 수학, 사회 교과 영역 이수 권장", "recommended": "", "note": "수학: 대수, 미적분Ⅰ, 확률과 통계 이수 권장"}, {"university": "숭실대", "department": "경영대학", "core": "국어, 수학, 사회 교과 영역 이수 권장", "recommended": "", "note": "수학: 대수, 미적분Ⅰ, 확률과 통계 이수 권장"}, {"university": "중앙대", "department": "사회기반시스템공학부 도시시스템공학전공", "core": "미적분Ⅱ, 기하, 물리학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "경기대", "department": "인문/예체능", "core": "국어, 영어, 수학, 사회(2과목), 과학, 한국사", "recommended": "", "note": "사회, 과학 이수 과목 수 지정 관심분야 일반선택 과목 우선 이수 권장"}, {"university": "단국대", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "성결대", "department": "글로벌경영기술대학", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수, 공학계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": "교과(군)별 과목의 위계를 따라 일반선택 과목을 우선 이수하고, 진로와 적성에 맞게 진로선택 과목과 융합선택 과목 이수 권장"}, {"university": "아주대", "department": "경영대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학/사회", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목 이수\n -과학/사회: 진로와 적성에 맞게 과목 이수"}, {"university": "한국항공대", "department": "사회", "core": "대수, 미적분Ⅰ, 확률과 통계", "recommended": "", "note": ""}, {"university": "협성대", "department": "경영대학", "core": "인문사회계열 적성과 진로에 따라 선택 과목 이수", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "동아대", "department": "경영대학", "core": "영어, 수학, 사회, 국어", "recommended": "", "note": ""}, {"university": "부산대", "department": "경제통상대학", "core": "확률과 통계, 미적분Ⅰ, 미적분Ⅱ", "recommended": "", "note": "제시 과목 중, 1과목 이상 이수"}, {"university": "부산대", "department": "경영대학", "core": "확률과 통계, 미적분Ⅰ, 미적분Ⅱ", "recommended": "", "note": "제시 과목 중, 1과목 이상 이수"}, {"university": "영남대", "department": "인문학", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 한국지리 탐구, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 인공지능 기초, 인간과 철학, 논리와 사고, 삶과 종교", "recommended": "", "note": "1순위 국어 / 2순위 영어, 사회 / 3순위 수학"}, {"university": "영남대", "department": "사회과학", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 한국지리 탐구, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 인공지능 기초, 인간과 철학, 논리와 사고, 삶과 종교, 대수, 확률과 통계, 미적분Ⅰ, 현대사회와 윤리, 생명과학, 체육1, 체육2, 기술가정, 정보, 한문, 진로와 직업, 생태환경\n-진로선택: 주제탐구 독서, 경제 수학, 인공지능 수학, 세포와 물질대사, 생물의 유전, 운동과 건강, 생활과학 탐구, 데이터 과학, 인간과 심리, 교육의 이해, 보건", "recommended": "", "note": "1순위 국어, 사회 / 2순위, 영어 / 3순위 수학"}, {"university": "영남대", "department": "경영·경제", "core": "-일반선택: 화법과 언어, 독서와 작문, 대수, 미적분Ⅰ, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리, 생명과학, 정보, 중국어, 진로와 직업\n-진로선택: 주제 탐구 독서, 직무 의사소통, 경제 수학, 영어 발표와 토론, 심화 영어, 직무 영어, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 인공지능 기초, 데이터 과학, 중국어 회화, 논리와 사고, 인간과 심리", "recommended": "", "note": "1순위 영어 / 2순위 수학 / 3순위 국어, 사회"}, {"university": "국립한밭대", "department": "인문사회대학", "core": "영어, 사회(역사/도덕 포함)", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "국립한밭대", "department": "경상대학", "core": "수학, 사회(역사/도덕 포함), 영어", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "충남대", "department": "경상대학", "core": "확률과 통계, 영어", "recommended": "", "note": "-영어: 2"}, {"university": "강원대 (춘천)", "department": "경영대학", "core": "화법과 언어, 독서와 작문, 영어Ⅰ, 영어Ⅱ, 영어독해와 작문, 미적분Ⅰ, 확률과 통계, 사회와 문화, 경제, 세계사, 세계시민과 지리, 한국지리, 정치, 법과 사회", "recommended": "국어, 영어, 수학, 사회, 제2외국어", "note": ""}, {"university": "강원대 (삼척·도계)", "department": "인문사회대학", "core": "확률과 통계, 미적분, 사회와 문화, 경제, 법과 사회 정치, 화법과 언어, 독서와 작문, 여행지리, 영어 독해와 작문, 영어 발표와 토론, 영미 문학 읽기, 세계 문화와 영어, 정치, 법과 사회, 윤리와 사상, 인간과 철학, 인간과 심리, 문학, 교육학, 동아시아 역사 기행, 일본어, 심화일본어, 일본어 회화", "recommended": "영어, 수학, 사회, 국어, 교양, 제2외국어/한문", "note": ""}, {"university": "한라대", "department": "미래라이프융합대학", "core": "국어, 영어, 수학, 사회(역사/도덕 포함), 과학 교과", "recommended": "", "note": ""}, {"university": "충북대", "department": "경영대학", "core": "영어, 사회(역사/도덕 포함)", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "한국기술교육대", "department": "사회융합계열 경영학부", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": ""}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "경영대학", "core": "수학, 사회, 영어", "recommended": "", "note": "-지리: 세계시민과 지리, 한국지리 탐구, 도시의 미래 탐구\n -역사: 세계사, 동아시아 역사기행\n -일반사회: 사회와 문화, 정치, 법과 사회, 경제, 국제관계의 이해\n -윤리: 현대사회와 윤리, 윤리와 사상, 인문학과 윤리\n -사회: 상기 지리, 역사, 일반사회, 윤리 전 과목\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "경상대학", "core": "영어, 수학, 사회", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "경상대학", "core": "수학, 영어", "recommended": "", "note": ""}, {"university": "전주대", "department": "경영대학", "core": "국어", "recommended": "", "note": "2과목 이상"}]}, {"id": "C12", "title": "심리학", "category": "인문사회", "keywords": ["심리", "심리학", "상담", "임상심리", "심리상담", "정신건강", "교육심리"], "summary": "확률과 통계(자동이수) 기반으로, 인간과 심리(K군)를 권장 선택합니다.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "사회 계열 과목 선택"}, {"period": "3학년 1학기", "group": "K군", "advice": "인간과 심리 선택 권장"}], "risks": ["인간과 심리(K군)는 심리학 진로 연계를 직접 보여주는 과목입니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어"], "우선선택": ["실용 통계", "인간과 심리"], "권장선택": ["현대사회와 윤리", "주제탐구독서"], "확장선택": ["사회문제 탐구", "생명과학"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "심리학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수[수학(확률과 통계) 포함]", "recommended": "", "note": ""}, {"university": "건국대", "department": "인문", "core": "국어, 영어, 사회", "recommended": "", "note": "일반선택 과목을 먼저 이수하고, 진로 적성에 맞게 진로선택 과목 및 융합선택 과목 이수를 추천"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "동국대", "department": "문과", "core": "역사, 일반사회, 국어, 영어, 일본어, 중국어, 윤리", "recommended": "한문, 역사, 일반사회, 교양, 지리, 윤리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "열린전공학부(인문)", "core": "국어, 영어", "recommended": "일반사회, 역사, 윤리, 지리, 제2외국어", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "서울시립대", "department": "자유전공학부(인문)", "core": "국어, 영어, 사회", "recommended": "", "note": ""}, {"university": "경기대", "department": "인문/예체능", "core": "국어, 영어, 수학, 사회(2과목), 과학, 한국사", "recommended": "", "note": "사회, 과학 이수 과목 수 지정 관심분야 일반선택 과목 우선 이수 권장"}, {"university": "단국대", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "영남대", "department": "인문학", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 한국지리 탐구, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 인공지능 기초, 인간과 철학, 논리와 사고, 삶과 종교", "recommended": "", "note": "1순위 국어 / 2순위 영어, 사회 / 3순위 수학"}, {"university": "국립한밭대", "department": "인문사회대학", "core": "영어, 사회(역사/도덕 포함)", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "강원대 (삼척·도계)", "department": "인문사회대학", "core": "확률과 통계, 미적분, 사회와 문화, 경제, 법과 사회 정치, 화법과 언어, 독서와 작문, 여행지리, 영어 독해와 작문, 영어 발표와 토론, 영미 문학 읽기, 세계 문화와 영어, 정치, 법과 사회, 윤리와 사상, 인간과 철학, 인간과 심리, 문학, 교육학, 동아시아 역사 기행, 일본어, 심화일본어, 일본어 회화", "recommended": "영어, 수학, 사회, 국어, 교양, 제2외국어/한문", "note": ""}, {"university": "단국대 (천안)", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}]}, {"id": "C13", "title": "사회과학(사회학·사회복지)", "category": "인문사회", "keywords": ["사회학", "사회복지", "복지", "사회과학", "사회정책", "사회사업"], "summary": "사회 계열 과목 중심으로 과목을 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "사회와 문화 또는 현대사회와 윤리"}, {"period": "2학년 2학기", "group": "E군", "advice": "윤리와 사상 또는 정치 선택"}], "risks": [], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어"], "우선선택": ["세계시민과 지리", "세계사", "현대사회와 윤리"], "권장선택": ["실용 통계", "주제탐구독서", "인간과 심리"], "확장선택": ["사회문제 탐구", "경제 수학"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "사회복지학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수[수학(확률과 통계) 포함]", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "사회학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수[수학(확률과 통계) 포함]", "recommended": "", "note": ""}, {"university": "건국대", "department": "인문", "core": "국어, 영어, 사회", "recommended": "", "note": "일반선택 과목을 먼저 이수하고, 진로 적성에 맞게 진로선택 과목 및 융합선택 과목 이수를 추천"}, {"university": "건국대", "department": "사회과학", "core": "국어, 사회, 수학(대수, 미적분Ⅰ, 확률과 통계)", "recommended": "", "note": ""}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "광운대", "department": "인문사회과학대학", "core": "화법과 언어, 독서와 작문, 문학, 대수, 미적분Ⅰ, 확률과 통계, 사회와 문화, 현대사회와 윤리, 한문, 제2외국어 과목", "recommended": "주제 탐구 독서, 문학과 영상, 영미 문학 읽기, 영어 발표와 토론, 윤리와 사상, 인문학과 윤리", "note": "융합선택 과목: 독서 토론과 글쓰기, 매체 의사소통, 실생활 영어 회화, 미디어 영어, 사회문제 탐구"}, {"university": "국민대", "department": "사회과학대학", "core": "사회와 문화, 화법과 언어", "recommended": "정치, 법과 사회, 국제 관계의 이해, 확률과 통계, 문학과 영상, 영어 발표와 토론, 동아시아 역사 기행", "note": "교과를 제시하지 않은 모집단위는 학생의 진로와 적성을 고려하여 교과목을 선택 이수할 것."}, {"university": "동국대", "department": "문과", "core": "역사, 일반사회, 국어, 영어, 일본어, 중국어, 윤리", "recommended": "한문, 역사, 일반사회, 교양, 지리, 윤리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "사회과학", "core": "일반사회", "recommended": "역사, 윤리, 지리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "열린전공학부(인문)", "core": "국어, 영어", "recommended": "일반사회, 역사, 윤리, 지리, 제2외국어", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "서울대", "department": "사회과학대학", "core": "제2외국어/한문", "recommended": "", "note": "해당 교과(군)의 일반선택, 진로선택, 융합선택 과목 중 1과목 이상"}, {"university": "서울시립대", "department": "사회복지학과", "core": "국어, 영어, 수학, 사회", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "자유전공학부(인문)", "core": "국어, 영어, 사회", "recommended": "", "note": ""}, {"university": "숭실대", "department": "사회과학대학", "core": "국어, 수학, 사회 교과 영역 이수 권장", "recommended": "", "note": "수학: 대수, 미적분Ⅰ, 확률과 통계 이수 권장"}, {"university": "중앙대", "department": "사회기반시스템공학부 도시시스템공학전공", "core": "미적분Ⅱ, 기하, 물리학, 역학과 에너지, 전자기와 양자", "recommended": "", "note": ""}, {"university": "경기대", "department": "인문/예체능", "core": "국어, 영어, 수학, 사회(2과목), 과학, 한국사", "recommended": "", "note": "사회, 과학 이수 과목 수 지정 관심분야 일반선택 과목 우선 이수 권장"}, {"university": "단국대", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "성결대", "department": "사회과학대학", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": "교과(군)별 과목의 위계를 따라 일반선택 과목을 우선 이수하고, 진로와 적성에 맞게 진로선택 과목과 융합선택 과목 이수 권장"}, {"university": "아주대", "department": "사회과학대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 과학/사회", "recommended": "", "note": "-수학: 일반선택 과목(대수, 미적분Ⅰ, 확률과 통계) 이수 후, 진로와 적성에 맞게 진로선택 과목 이수\n -과학/사회: 진로와 적성에 맞게 과목 이수"}, {"university": "한국항공대", "department": "사회", "core": "대수, 미적분Ⅰ, 확률과 통계", "recommended": "", "note": ""}, {"university": "협성대", "department": "인문사회과학대학", "core": "인문사회계열 적성과 진로에 따라 선택 과목 이수", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "동아대", "department": "사회과학대학", "core": "국어, 영어, 사회, 수학", "recommended": "", "note": ""}, {"university": "경북대", "department": "사회과학대학", "core": "사회와 문화, 세계시민과 지리, 현대사회와 윤리, 정치, 인간과 심리", "recommended": "국제관계의 이해, 한국지리 탐구, 도시의 미래 탐구, 인문학과 윤리", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "영남대", "department": "인문학", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 한국지리 탐구, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 인공지능 기초, 인간과 철학, 논리와 사고, 삶과 종교", "recommended": "", "note": "1순위 국어 / 2순위 영어, 사회 / 3순위 수학"}, {"university": "영남대", "department": "사회과학", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 한국지리 탐구, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 인공지능 기초, 인간과 철학, 논리와 사고, 삶과 종교, 대수, 확률과 통계, 미적분Ⅰ, 현대사회와 윤리, 생명과학, 체육1, 체육2, 기술가정, 정보, 한문, 진로와 직업, 생태환경\n-진로선택: 주제탐구 독서, 경제 수학, 인공지능 수학, 세포와 물질대사, 생물의 유전, 운동과 건강, 생활과학 탐구, 데이터 과학, 인간과 심리, 교육의 이해, 보건", "recommended": "", "note": "1순위 국어, 사회 / 2순위, 영어 / 3순위 수학"}, {"university": "국립한밭대", "department": "인문사회대학", "core": "영어, 사회(역사/도덕 포함)", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "충남대", "department": "사회과학대학", "core": "국어, 영어, 사회, 확률과 통계", "recommended": "", "note": "-국어, 영어, 사회: 2"}, {"university": "충남대", "department": "인문사회융합학부", "core": "국어, 영어, 사회(역사/도덕 포함), 확률과 통계", "recommended": "", "note": "-국어, 영어, 사회: 각 교과별 2과목 이상"}, {"university": "강원대 (춘천)", "department": "사회과학대학", "core": "세계시민과 지리, 세계사, 여행지리, 한국지리 탐구, 화법과 언어, 독서와 작문, 영어 독해와 작문, 영어 발표와 토론, 사회와 문화, 사회문제 탐구, 확률과 통계, 정치, 법과 사회, 도시의 미래 탐구, 현대사회와 윤리, 윤리와 사상", "recommended": "국어, 영어, 사회, 수학", "note": ""}, {"university": "강원대 (삼척·도계)", "department": "인문사회대학", "core": "확률과 통계, 미적분, 사회와 문화, 경제, 법과 사회 정치, 화법과 언어, 독서와 작문, 여행지리, 영어 독해와 작문, 영어 발표와 토론, 영미 문학 읽기, 세계 문화와 영어, 정치, 법과 사회, 윤리와 사상, 인간과 철학, 인간과 심리, 문학, 교육학, 동아시아 역사 기행, 일본어, 심화일본어, 일본어 회화", "recommended": "영어, 수학, 사회, 국어, 교양, 제2외국어/한문", "note": ""}, {"university": "충북대", "department": "사회과학대학", "core": "영어, 사회(역사/도덕 포함), 수학", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "한국기술교육대", "department": "사회융합계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": ""}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "사회과학대학", "core": "영어, 사회, 국어, 지리, 역사", "recommended": "", "note": "-지리: 세계시민과 지리, 한국지리 탐구, 도시의 미래 탐구\n -역사: 세계사, 동아시아 역사기행\n -일반사회: 사회와 문화, 정치, 법과 사회, 경제, 국제관계의 이해\n -윤리: 현대사회와 윤리, 윤리와 사상, 인문학과 윤리\n -사회: 상기 지리, 역사, 일반사회, 윤리 전 과목\n -화학: 화학, 물질과 에너지, 화학 반응의 세계\n*평가활용: 일반 및 진로선택 과목을 위주로 평가에 활용, 모집단위별 관련 교과(군)이나 과목 군의 일반선택 과목을 먼저 이수할 것을 권장함."}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "사회과학대학", "core": "영어, 사회", "recommended": "", "note": ""}, {"university": "전주대", "department": "사회과학대학", "core": "사회와 문화, 현대사회와 윤리, 도시와 미래탐구, 법과 사회, 윤리와 사상, 정치, 경제, 인문학과 윤리, 화법과 언어, 독서와 작문, 문학, 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영어Ⅰ, 영미 문학 읽기, 독해와 작문, 국제관계의 이해, 생태와 환경, 인간과 심리, 사회와 문학, 확률과 통계, 직무 수학, 직무 영어, 진로와 직업, 인간과 철학", "recommended": "", "note": ""}, {"university": "전남대 (여수)", "department": "문화사회과학대학", "core": "영어, 일본어, 중국어, 국어, 사회", "recommended": "", "note": ""}]}, {"id": "C14", "title": "사범·교육", "category": "인문사회", "keywords": ["사범", "교육학", "교사", "교육", "교대", "사범대", "초등교사", "중등교사", "교직"], "summary": "희망 교과에 따라 해당 과목을 깊게 이수하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "수학교육→물리학, 국어교육→사회 계열"}, {"period": "2학년 2학기", "group": "D군", "advice": "수학교육→기하, 국어교육→독서 토론과 글쓰기"}, {"period": "3학년 1학기", "group": "H군", "advice": "수학교육 희망 시 미적분Ⅱ 선택"}], "risks": ["희망 교과 관련 과목을 깊이 이수한 세특이 사범계열 진로 연계 근거를 강화합니다."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어"], "우선선택": ["세계사", "현대사회와 윤리"], "권장선택": ["주제탐구독서", "영어 발표와 토론", "인간과 심리"], "확장선택": ["언어생활 탐구", "매체의사소통"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "고려대", "department": "사범대학", "core": "(권장) 미적분Ⅱ, 기하", "recommended": "미적분Ⅱ, 기하", "note": ""}, {"university": "동국대", "department": "문과", "core": "역사, 일반사회, 국어, 영어, 일본어, 중국어, 윤리", "recommended": "한문, 역사, 일반사회, 교양, 지리, 윤리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "사범", "core": "일반사회, 국어, 역사, 지리, 수학②, 화학, 기술·가정", "recommended": "역사, 윤리, 지리, 일반사회, 생명과학, 정보", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "열린전공학부(인문)", "core": "국어, 영어", "recommended": "일반사회, 역사, 윤리, 지리, 제2외국어", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "서울대", "department": "사범대학", "core": "제2외국어/한문, 물리학, 화학, 생명과학, 지구과학", "recommended": "기하, 미적분Ⅱ, 과학", "note": "해당 교과(군)의 일반선택, 진로선택, 융합선택 과목 중 1과목 이상"}, {"university": "서울시립대", "department": "자유전공학부(인문)", "core": "국어, 영어, 사회", "recommended": "", "note": ""}, {"university": "단국대", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "부산대", "department": "사범대학", "core": "화학, 생명과학, 확률과 통계, 기하, 미적분Ⅱ, 물리학, 지구과학", "recommended": "", "note": "제시 과목 관련 일반선택 과목 및 진로선택 과목 중 3과목 이상 이수"}, {"university": "경북대", "department": "사범대학", "core": "학과별 특성에 맞는 교과목(예-국어교육과: 국어 교과[군] 일반선택 과목, 진로선택 과목)", "recommended": "", "note": "3과목 이상(위계에 맞게) 이수 권장"}, {"university": "영남대", "department": "교육", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리, 중국어, 일본어, 한문, 진로와 직업\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영미 문학 읽기, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 인공지능 기초, 데이터 과학, 한문 고전 읽기, 인간과 철학, 논리와 사고, 인간과 심리, 교육의 이해, 삶과 종교, 대수, 미적분Ⅰ, 확률과 통계, 물리학\n-진로선택: 기하, 미적분Ⅱ, 인공지능 수학", "recommended": "", "note": "1순위 국어, 사회, 기타(교육학 등) / 2순위 영어, 수학 / 3순위 과학"}, {"university": "진주교육대", "department": "초등교육과", "core": "전 과목", "recommended": "", "note": ""}, {"university": "충남대", "department": "사범대학(국어교육과, 영어교육과, 교육학과)", "core": "국어, 영어, 제2외국어/한문", "recommended": "", "note": "-국어, 영어: 2"}, {"university": "충남대", "department": "사범대학", "core": "대수, 미적분Ⅰ, 확률과 통계, 기하, 미적분Ⅱ, 과학", "recommended": "", "note": "-과학: 일반선택 과목 이수 후 진로(융합)선택 과목 1과목 이상"}, {"university": "강원대 (춘천)", "department": "사범대학", "core": "화법과 언어, 독서와 작문, 사회와 문화, 진로와 직업, 교육의 이해, 논술, 문학, 한국사(Ⅰ, Ⅱ), 한문, 한문 고전 읽기, 세계시민과 지리, 세계사, 한국지리 탐구, 동아시아 역사 기행, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 영미 문학 읽기, 영어 발표와 토론, 현대사회와 윤리, 윤리와 사상, 인문학과 윤리, 정치, 경제, 법과 사회, 여행지리, 기술·가정, 생활과학 탐구, 물리학, 화학, 생명과학, 지구과학, 미적분, 기하, 확률과 통계, 체육1, 체육2, 운동과 건강, 스포츠 문화, 스포츠과학", "recommended": "국어, 영어, 사회, 교양, 한문, 과학, 기술·가정, 수학, 체육", "note": ""}, {"university": "충북대", "department": "사범대학", "core": "국어, 사회(역사/도덕 포함), 영어, 수학, 과학", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "사범대학", "core": "국어, 영어, 사회, 지리, 역사, 윤리, 수학, 물리학, 화학, 생명과학, 지구과학, 기술·가정/정보", "recommended": "", "note": ""}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "사범대학", "core": "국어, 영어, 수학, 과학", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "사범대학", "core": "국어, 영어, 독일어, 사회, 과학, 수학, 체육", "recommended": "", "note": ""}, {"university": "전주대", "department": "사범대학", "core": "국어, 영어, 문학, 주제 탐구 독서, 한문, 한문 고전 읽기, 기술·가정, 생활과학 탐구, 물리학, 화학, 생명과학, 지구과학, 역학과 에너지, 전자기와 양자, 물리과 에너지, 화학 반응의 세계, 행성우주과학, 수학, 인간과 철학, 인간과 심리, 교육의 이해", "recommended": "", "note": "1과목 이상"}]}, {"id": "C15", "title": "국어국문·인문", "category": "인문사회", "keywords": ["국어국문", "인문", "철학", "문학", "국문학", "인문학", "역사학", "언어학"], "summary": "국어·영어·사회 계열 이수를 기본으로, 진로 연계 사회 과목을 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "세계사 또는 현대사회와 윤리"}, {"period": "2학년 2학기", "group": "D군", "advice": "독서 토론과 글쓰기 권장"}, {"period": "2학년 2학기", "group": "E군", "advice": "동아시아 역사 기행 또는 윤리와 사상"}], "risks": [], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어"], "우선선택": ["현대사회와 윤리", "주제탐구독서"], "권장선택": ["세계사", "영어 발표와 토론", "문학과 영상"], "확장선택": ["언어생활 탐구", "매체의사소통", "세계문화와 영어"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "국어국문학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "철학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "국사학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "영어영문학부", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "국제학부", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "건국대", "department": "인문", "core": "국어, 영어, 사회", "recommended": "", "note": "일반선택 과목을 먼저 이수하고, 진로 적성에 맞게 진로선택 과목 및 융합선택 과목 이수를 추천"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "국민대", "department": "글로벌인문·지역대학", "core": "중국어, 한국사, 동아시아사", "recommended": "중국어 회화, 한문 고전 읽기, 세계사, 한국지리, 한문", "note": "교과를 제시하지 않은 모집단위는 학생의 진로와 적성을 고려하여 교과목을 선택 이수할 것."}, {"university": "동국대", "department": "불교", "core": "역사, 윤리", "recommended": "지리, 일반사회", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "문과", "core": "역사, 일반사회, 국어, 영어, 일본어, 중국어, 윤리", "recommended": "한문, 역사, 일반사회, 교양, 지리, 윤리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "열린전공학부(인문)", "core": "국어, 영어", "recommended": "일반사회, 역사, 윤리, 지리, 제2외국어", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "서울대", "department": "인문대학", "core": "제2외국어/한문", "recommended": "", "note": "해당 교과(군)의 일반선택, 진로선택, 융합선택 과목 중 1과목 이상"}, {"university": "서울시립대", "department": "영어영문학과", "core": "영어", "recommended": "국어, 수학, 사회", "note": ""}, {"university": "서울시립대", "department": "국어국문학과", "core": "국어", "recommended": "영어, 사회", "note": ""}, {"university": "서울시립대", "department": "국사학과", "core": "역사", "recommended": "국어, 사회", "note": ""}, {"university": "서울시립대", "department": "철학과", "core": "국어, 영어, 수학, 사회", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "자유전공학부(인문)", "core": "국어, 영어, 사회", "recommended": "", "note": ""}, {"university": "숭실대", "department": "인문대학", "core": "국어, 영어, 사회 교과 영역 이수 권장", "recommended": "", "note": ""}, {"university": "경기대", "department": "인문/예체능", "core": "국어, 영어, 수학, 사회(2과목), 과학, 한국사", "recommended": "", "note": "사회, 과학 이수 과목 수 지정 관심분야 일반선택 과목 우선 이수 권장"}, {"university": "단국대", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "성결대", "department": "인문대학", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": "교과(군)별 과목의 위계를 따라 일반선택 과목을 우선 이수하고, 진로와 적성에 맞게 진로선택 과목과 융합선택 과목 이수 권장"}, {"university": "아주대", "department": "인문대학", "core": "수학, 과학/사회", "recommended": "", "note": "진로와 적성에 맞게 과목 이수"}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "동아대", "department": "인문과학대학", "core": "국어, 사회, 영어", "recommended": "", "note": ""}, {"university": "경북대", "department": "인문대학", "core": "전공 관련 제2외국어/한문 교과(군), 세계사, 사회와 문화", "recommended": "동아시아 역사기행", "note": "1과목 이상 이수 권장"}, {"university": "영남대", "department": "언어·문학", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 확률과 통계, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리, 제2외국어 관련 과목, 한문, 진로와 직업\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영미 문학 읽기, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 생활과학 탐구, 인공지능 기초, 제2외국어 관련 과목: 한문 고전 읽기, 인간과 철학, 논리와 사고", "recommended": "", "note": "1순위 국어 / 2순위 사회 / 3순위 기타(한문, 논리 등)"}, {"university": "영남대", "department": "인문학", "core": "-일반선택: 화법과 언어, 독서와 작문, 문학, 영어Ⅰ, 영어Ⅱ, 영어 독해와 작문, 세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리\n-진로선택: 주제 탐구 독서, 문학과 영상, 직무 의사소통, 영어 발표와 토론, 심화 영어, 심화 영어 독해와 작문, 직무 영어, 한국지리 탐구, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해, 인공지능 기초, 인간과 철학, 논리와 사고, 삶과 종교", "recommended": "", "note": "1순위 국어 / 2순위 영어, 사회 / 3순위 수학"}, {"university": "국립한밭대", "department": "인문사회대학", "core": "영어, 사회(역사/도덕 포함)", "recommended": "", "note": "*관련 교과(군)을 제시하지 않은 모집단위(융합자율대학, 야간학과)는 계열 상관없이 학생의 진로와 적성에 따라 과목 선택하여 이수하도록 권장함."}, {"university": "충남대", "department": "인문대학", "core": "국어, 영어, 제2외국어/한문", "recommended": "", "note": "-국어, 영어: 2"}, {"university": "충남대", "department": "국제학부", "core": "영어", "recommended": "", "note": "3과목 이상"}, {"university": "강원대 (춘천)", "department": "인문대학", "core": "화법과 언어, 독서와 작문, 문학, 세계사, 동아시아 역사기행, 한문, 한문 고전 읽기, 사회와 문화, 독일어, 심화 독일어, 독일어 회화, 여행지리, 프랑스어, 심화 프랑스어, 프랑스 회화, 영어 독해와 작문, 영미 문학 읽기, 영어 발표와 토론, 세계 문화와 영어, 일본어, 심화 일본어, 일본어 회화, 중국어, 심화중국어, 현대사회와 윤리, 윤리와 사상, 윤리문제 탐구, 인간과 철학, 논리와 사고", "recommended": "국어, 사회, 한문, 영어, 제2외국어, 교양", "note": ""}, {"university": "강원대 (삼척·도계)", "department": "인문사회대학", "core": "확률과 통계, 미적분, 사회와 문화, 경제, 법과 사회 정치, 화법과 언어, 독서와 작문, 여행지리, 영어 독해와 작문, 영어 발표와 토론, 영미 문학 읽기, 세계 문화와 영어, 정치, 법과 사회, 윤리와 사상, 인간과 철학, 인간과 심리, 문학, 교육학, 동아시아 역사 기행, 일본어, 심화일본어, 일본어 회화", "recommended": "영어, 수학, 사회, 국어, 교양, 제2외국어/한문", "note": ""}, {"university": "충북대", "department": "인문대학", "core": "국어, 사회(역사/도덕 포함), 사회, 영어, 제2외국어", "recommended": "", "note": ""}, {"university": "단국대 (천안)", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "인문대학", "core": "국어, 영어, 사회, 독일어, 프랑스어, 중국어, 한문, 일본어, 역사, 윤리", "recommended": "", "note": ""}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "글로벌인문대학", "core": "국어, 사회, 영어, 한국사", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전북대", "department": "인문대학", "core": "사회, 국어, 영어, 독일어, 스페인어, 일본어, 중국어, 프랑스어", "recommended": "", "note": ""}, {"university": "전주대", "department": "인문콘텐츠대학", "core": "국어, 영어, 사회, 예술, 제2외국어, 교양", "recommended": "", "note": "일반선택 과목 2과목 이상"}]}, {"id": "C16", "title": "언론·미디어", "category": "인문사회", "keywords": ["언론", "미디어", "방송", "기자", "PD", "신문", "광고", "홍보", "커뮤니케이션", "언론정보"], "summary": "국어·영어 기반으로 사회 계열과 매체 과목을 선택하세요.", "schedule": [{"period": "2학년 1학기", "group": "A군", "advice": "주제 탐구 독서 또는 영어 발표와 토론"}, {"period": "3학년 2학기", "group": "L군", "advice": "매체 의사소통 선택 권장"}], "risks": [], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어"], "우선선택": ["문학과 영상", "영어 발표와 토론", "매체의사소통"], "권장선택": ["주제탐구독서", "현대사회와 윤리"], "확장선택": ["세계문화와 영어", "사회문제 탐구"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "미디어기술콘텐츠학과", "core": "수학", "recommended": "", "note": "과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "동국대", "department": "문과", "core": "역사, 일반사회, 국어, 영어, 일본어, 중국어, 윤리", "recommended": "한문, 역사, 일반사회, 교양, 지리, 윤리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "동국대", "department": "열린전공학부(인문)", "core": "국어, 영어", "recommended": "일반사회, 역사, 윤리, 지리, 제2외국어", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "서울시립대", "department": "자유전공학부(인문)", "core": "국어, 영어, 사회", "recommended": "", "note": ""}, {"university": "단국대", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "단국대 (천안)", "department": "인문계열", "core": "국어, 수학, 영어, 사회", "recommended": "", "note": "일반선택 과목 이수 후 진로와 적성에 맞게 진로선택 과목, 융합선택 과목을 이수할 것."}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "전주대", "department": "문화융합대학", "core": "국어, 수학, 예술, 미술, 기술·가정, 로봇과 공학세계, 생활과학 탐구, 진로와 직업, 생태와 환경, 인간과 철학, 인간과 심리, 논리와 사고, 사회, 체육1, 체육2, 운동과 건강, 스포츠 문화, 스포츠과학", "recommended": "", "note": "6과목 이상"}, {"university": "전주대", "department": "문화관광대학", "core": "영어, 사회, 생활과학 탐구", "recommended": "", "note": "2과목 이상"}]}, {"id": "C17", "title": "디자인·시각예술", "category": "예체능", "keywords": ["디자인", "시각디자인", "UX", "UI", "그래픽", "영상", "미술", "예술", "조형", "산업디자인"], "summary": "국어·영어 기반에서 예술·디자인 관련 활동으로 학생부를 구성하세요.", "schedule": [{"period": "2학년 1학기", "group": "B군", "advice": "사회·문화 또는 관심 과목"}, {"period": "3학년 1학기", "group": "J군", "advice": "미술 감상과 비평 선택 권장"}], "risks": [], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어"], "우선선택": ["미술 감상과 비평", "문학과 영상"], "권장선택": ["주제탐구독서", "영어 발표와 토론"], "확장선택": ["미술창작", "인공지능 기초"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "공간디자인·소비자학과", "core": "수학", "recommended": "", "note": "과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "동국대", "department": "예술", "core": "(권장) 일반사회, 역사, 윤리, 지리", "recommended": "일반사회, 역사, 윤리, 지리", "note": "기초 학업 역량을 기반으로 한 전공 관련 역량 및 소양이 필요함에 따라 사회 교과의 관심 있는 과목이수를 추천함."}, {"university": "서울시립대", "department": "건축학부 건축학전공", "core": "국어, 영어, 수학(기하), 과학(지구과학, 물리, 화학)", "recommended": "", "note": ""}, {"university": "서울시립대", "department": "조경학과", "core": "국어, 영어, 수학, 과학, 사회", "recommended": "", "note": ""}, {"university": "중앙대", "department": "예술공학부", "core": "미적분Ⅱ, 기하", "recommended": "", "note": ""}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "동아대", "department": "디자인환경대학", "core": "국어, 영어, 수학, 사회, 과학", "recommended": "", "note": ""}, {"university": "강원대 (춘천)", "department": "문화예술·공과대학", "core": "미적분, 기하, 물리학, 정보, 인공지능 기초, 영어 독해와 작문, 영어 발표와 토론, 화학, 확률과 통계, 지구과학, 생명과학, 융합과학 탐구, 화법과 언어, 문학, 독서와 작문, 사회와 문화", "recommended": "수학, 과학, 기술·가정/정보, 영어, 국어, 사회", "note": ""}, {"university": "강원대 (삼척·도계)", "department": "디자인스포츠대학", "core": "화법과 언어, 독서와 작문, 문학, 영어 발표와 토론, 미술, 미술 창작, 미술 감상과 비평, 영어 독해와 작문, 체육1, 체육2, 운동과 건강", "recommended": "국어, 영어, 예술, 체육", "note": ""}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "미술대학", "core": "국어, 사회", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}]}, {"id": "C18", "title": "예체능(음악·체육)", "category": "예체능", "keywords": ["음악", "체육", "스포츠", "실기", "예체능", "무용", "체육교육", "음악교육", "체대", "음대"], "summary": "전공 실기가 핵심입니다. 음악·체육·미술 관련 교과 이수 근거를 함께 갖추세요.", "schedule": [{"period": "3학년 1학기", "group": "J군", "advice": "음악 감상과 비평(음악 계열)"}, {"period": "3학년 1학기", "group": "K군", "advice": "인간과 심리(체육 계열)"}], "risks": ["J군(음악 감상과 비평)은 음악 계열 진학 시 관련 교과 이수 근거로 활용됩니다.", "체육 계열은 K군 인간과 심리, 스포츠 관련 교과를 선택하면 이수 근거가 강화됩니다.", "일부 대학(동아대, 동양대 등)은 체육 계열에도 미적분Ⅰ·Ⅱ, 영어를 반영과목으로 지정하므로 희망 대학의 공식 발표를 확인하세요."], "subjects": {"자동이수": ["국어", "대수", "확률과 통계", "미적분Ⅰ", "영어"], "우선선택": ["음악 감상과 비평", "미술 감상과 비평", "인간과 심리"], "권장선택": ["영어 발표와 토론", "문학과 영상"], "확장선택": ["스포츠 생활", "미술창작", "주제탐구독서"]}, "university_notes": [{"university": "가톨릭대", "department": "자유전공학부", "core": "계열 구분 없이 자신의 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "아동학과", "core": "인문사회계열 진로 및 적성을 고려하여 교과목 선택 이수", "recommended": "", "note": ""}, {"university": "가톨릭대", "department": "의류학과", "core": "수학", "recommended": "", "note": "과목 위계를 고려하여 3과목 이상"}, {"university": "건국대", "department": "자유전공", "core": "계열 상관없이 자신의 진로와 적성에 따라 과목 선택하여 이수", "recommended": "", "note": ""}, {"university": "한국체대", "department": "스포츠과학대학", "core": "체육1, 체육2, 스포츠과학", "recommended": "", "note": "융합선택 과목: 스포츠 생활1"}, {"university": "한국체대", "department": "생활체육대학", "core": "체육1, 체육2, 스포츠과학, 스포츠문화, 운동과 건강", "recommended": "", "note": ""}, {"university": "한국체대", "department": "스포츠문화예술대학", "core": "체육1, 체육2, 스포츠과학, 운동과 건강", "recommended": "", "note": "융합선택 과목: 스포츠 생활1"}, {"university": "경성대학교", "department": "전체", "core": "전 과목", "recommended": "", "note": "진로와 적성에 따라 과목 선택 이수 권장"}, {"university": "동아대", "department": "예술체육대학", "core": "국어, 영어, 수학, 사회, 과학", "recommended": "", "note": ""}, {"university": "한라대", "department": "미래라이프융합대학", "core": "국어, 영어, 수학, 사회(역사/도덕 포함), 과학 교과", "recommended": "", "note": ""}, {"university": "광주교육대", "department": "전 모집단위", "core": "전 과목", "recommended": "", "note": "초등교과교육에 필요한 균형 있는 교과(군) 이수 및 성취"}, {"university": "전남대 (광주)", "department": "자율전공학부(4년)", "core": "국어, 영어", "recommended": "", "note": ""}, {"university": "조선대", "department": "체육대학", "core": "국어, 영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}, {"university": "조선대", "department": "자유전공학부", "core": "영어", "recommended": "", "note": "과목 선택 시 모집단위별 관련 교과(군)이나 과목군의 일반선택 과목을 먼저 이수할 것을 권장"}]}];
+
+
+// ════════════════════════════════════════
+// SCHOOL CONFIGURATION
+// ════════════════════════════════════════
+let currentSchool = '';
+
+// ── 창원경일여고 편제표 ──
+const SEMESTERS_GIRLS = [
+  {code:"1-1",label:"1학년 1학기",cls:"hdr-11",
+   fixed:["공통국어1","공통수학1","공통영어1","한국사1","통합사회1","통합과학1","과학탐구실험1","체육1","미술","정보"],
+   groups:[]},
+
+  {code:"1-2",label:"1학년 2학기",cls:"hdr-12",
+   fixed:["공통국어2","공통수학2","공통영어2","한국사2","통합사회2","통합과학2","과학탐구실험2","체육2","음악","기술·가정"],
+   groups:[]},
+
+  {code:"2-1",label:"2학년 1학기",cls:"hdr-21",
+   fixed:["문학","대수","영어Ⅰ","스포츠 문화","생태와 환경"],
+   groups:[
+     {code:"A",label:"학기별 선택 과목 [택3]",limit:3,
+      subs:["주제탐구독서","문학과 영상","기하","경제 수학","영어 발표와 토론","심화 영어","세계사","세계시민과 지리","현대사회와 윤리","사회와 문화","정치","법과 사회","경제","물리학","화학","생명과학","지구과학","역학과 에너지","화학 반응의 세계","세포와 물질대사","행성우주과학"]},
+     {code:"G",label:"제2외국어 [택1]",limit:1,
+      subs:["중국어","일본어"]},
+     {code:"J",label:"예술 [택1]",limit:1,
+      subs:["미술 창작","음악연주와창작"]}
+   ]},
+
+  {code:"2-2",label:"2학년 2학기",cls:"hdr-22",
+   fixed:["화법과 언어","미적분Ⅰ","영어Ⅱ","스포츠 과학","인문학적 상상여행"],
+   groups:[
+     {code:"B",label:"학기별 선택 과목 [택3]",limit:3,
+      subs:["주제탐구독서","문학과 영상","기하","경제 수학","영어 발표와 토론","심화 영어","세계사","세계시민과 지리","현대사회와 윤리","사회와 문화","정치","법과 사회","경제","물리학","화학","생명과학","지구과학","역학과 에너지","화학 반응의 세계","세포와 물질대사","행성우주과학"]},
+     {code:"F",label:"제2외국어·기술가정·정보 [택1]",limit:1,
+      subs:["중국 문화","생활과학 탐구","아동발달과 부모","인공지능 기초"]}
+   ]},
+
+  {code:"3-1",label:"3학년 1학기",cls:"hdr-31",
+   fixed:["독서와 작문","확률과 통계","영어 독해와 작문","운동과 건강"],
+   groups:[
+     {code:"C",label:"선택 과목 1학기 [택4]",limit:4,
+      subs:["언어생활 탐구","미적분Ⅱ","심화 영어 독해와 작문","한국지리 탐구","도시의 미래 탐구","동아시아 역사 기행","윤리와 사상","국제 관계의 이해","전자기와 양자","물질과 에너지","생물의 유전","지구시스템과학","융합과학 탐구"]},
+     {code:"K",label:"교양 [택1]",limit:1,
+      subs:["인간과 철학","인간과 심리","교육의 이해","보건","인간과 경제활동"]}
+   ]},
+
+  {code:"3-2",label:"3학년 2학기",cls:"hdr-32",
+   fixed:["스포츠생활1","논술"],
+   groups:[
+     {code:"D",label:"선택 과목 2학기 [택6]",limit:6,
+      subs:["독서 토론과 글쓰기","매체 의사소통","수학과제 탐구","실용 통계","세계 문화와 영어","여행 지리","사회문제 탐구","윤리문제 탐구","기후변화와 환경생태","과학의 역사와 문화"]}
+   ]}
+];
+
+const GRP_LIMITS_GIRLS = {
+  "A":3,
+  "G":1,
+  "J":1,
+  "B":3,
+  "F":1,
+  "C":4,
+  "K":1,
+  "D":6
+};
+
+const GRP_LABEL_GIRLS = {
+  "A":"2학년 1학기 — 학기별 선택 과목 (3개 선택)",
+  "G":"2학년 1학기 — 제2외국어 (1개 선택)",
+  "J":"2학년 1학기 — 예술 (1개 선택)",
+  "B":"2학년 2학기 — 학기별 선택 과목 (3개 선택)",
+  "F":"2학년 2학기 — 제2외국어·기술가정·정보 (1개 선택)",
+  "C":"3학년 1학기 — 선택 과목 (4개 선택)",
+  "K":"3학년 1학기 — 교양 (1개 선택)",
+  "D":"3학년 2학기 — 선택 과목 (6개 선택)"
+};
+
+// ── 창원경일고 편제표 (원본) ──
+const SEMESTERS_BOYS = [
+  {code:"1-1",label:"1학년 1학기",cls:"hdr-11",
+   fixed:["공통국어1","공통수학1","공통영어1","한국사1","통합사회1","통합과학1","과학탐구실험1","체육1","미술(교차)"],groups:[]},
+  {code:"1-2",label:"1학년 2학기",cls:"hdr-12",
+   fixed:["공통국어2","공통수학2","공통영어2","한국사2","통합사회2","통합과학2","과학탐구실험2","체육2","음악(교차)"],groups:[]},
+  {code:"2-1",label:"2학년 1학기",cls:"hdr-21",
+   fixed:["문학","대수","영어Ⅰ","스포츠 생활1"],
+   groups:[
+     {code:"A",label:"국·영·수 계열 [택1]",limit:1,
+      subs:["주제 탐구 독서","문학과 영상","영미 문학 읽기","인공지능 수학","실용 통계"]},
+     {code:"B",label:"사회·과학 탐구 [택3]",limit:3,
+      subs:["세계시민과 지리","세계사","현대사회와 윤리","사회와 문화","법과 사회","물리학","화학","생명과학","지구과학"]}
+   ]},
+  {code:"2-2",label:"2학년 2학기",cls:"hdr-22",
+   fixed:["화법과 언어","미적분Ⅰ","영어Ⅱ","스포츠 생활2"],
+   groups:[
+     {code:"D",label:"국·영·수 계열 [택1]",limit:1,
+      subs:["독서 토론과 글쓰기","영어 발표와 토론","기하"]},
+     {code:"E",label:"사회·과학 탐구 [택3]",limit:3,
+      subs:["도시의 미래 탐구","동아시아 역사 기행","윤리와 사상","정치","경제","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학"]},
+     {code:"F",label:"기술·가정·정보·제2외국어 [택1]",limit:1,
+      subs:["로봇과 공학세계","인공지능 기초","일본 문화","중국 문화"]},
+     {code:"G",label:"제2외국어 [택1]",limit:1,
+      subs:["일본어","중국어"]}
+   ]},
+  {code:"3-1",label:"3학년 1학기",cls:"hdr-31",
+   fixed:["독서와 작문","확률과 통계","심화 영어Ⅰ"],
+   groups:[
+     {code:"H",label:"국·영·수 계열 [택1]",limit:1,
+      subs:["언어생활 탐구","심화 영어 독해와 작문","경제 수학","미적분Ⅱ"]},
+     {code:"I",label:"사회·과학 탐구 [택3]",limit:3,
+      subs:["한국지리 탐구","금융과 경제생활","사회문제 탐구","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","물리학 실험","화학 실험","생명과학 실험"]},
+     {code:"K",label:"교양 [택1]",limit:1,
+      subs:["생태와 환경","인간과 심리"]}
+   ]},
+  {code:"3-2",label:"3학년 2학기",cls:"hdr-32",
+   fixed:["독서 토론과 글쓰기","실용 통계","심화 영어Ⅱ"],
+   groups:[
+     {code:"L",label:"국·영·수 계열 [택1]",limit:1,
+      subs:["매체 의사소통","미디어 영어","고급 미적분"]},
+     {code:"M",label:"사회·과학 탐구 [택2]",limit:2,
+      subs:["여행지리","윤리문제 탐구","역사로 탐구하는 현대 세계","융합과학 탐구","과학의 역사와 문화","기후변화와 환경생태"]}
+   ]}
+];
+
+const GRP_LIMITS_BOYS = {"A":1,"B":3,"G":1,"D":1,"E":3,"F":1,"H":1,"I":3,"K":1,"L":1,"M":2};
+const GRP_LABEL_BOYS = {
+  "A":"2학년 1학기 — 국·영·수 계열 (1개 선택)",
+  "B":"2학년 1학기 — 사회·과학 탐구 (3개 선택)",
+  "D":"2학년 2학기 — 국·영·수 계열 (1개 선택)",
+  "E":"2학년 2학기 — 사회·과학 탐구 (3개 선택)",
+  "G":"2학년 2학기 — 제2외국어 (1개 선택)",
+  "F":"2학년 2학기 — 기술·정보·제2외국어 (1개 선택)",
+  "H":"3학년 1학기 — 국·영·수 계열 (1개 선택)",
+  "I":"3학년 1학기 — 사회·과학 탐구 (3개 선택)",
+  "K":"3학년 1학기 — 교양 (1개 선택)",
+  "L":"3학년 2학기 — 국·영·수 계열 (1개 선택)",
+  "M":"3학년 2학기 — 사회·과학 탐구 (2개 선택)"
+};
+
+// Active references (will be set by selectSchool)
+let SEMESTERS = [];
+let GRP_LIMITS = {};
+let GRP_LABEL = {};
+
+function selectSchool(school) {
+  currentSchool = school;
+  
+  // Update button states
+  document.getElementById('btnGirls').classList.toggle('active', school === 'girls');
+  document.getElementById('btnBoys').classList.toggle('active', school === 'boys');
+  
+  // Set active data
+  if (school === 'girls') {
+    SEMESTERS = SEMESTERS_GIRLS;
+    GRP_LIMITS = GRP_LIMITS_GIRLS;
+    GRP_LABEL = GRP_LABEL_GIRLS;
+    document.getElementById('schoolSubTitle').textContent = '창원경일여고 — 2026학년도 입학생 기준 편제표';
+    document.querySelector('.hdr h1').textContent = '📚 창원경일여고 선택과목 설계 도우미';
+  } else {
+    SEMESTERS = SEMESTERS_BOYS;
+    GRP_LIMITS = GRP_LIMITS_BOYS;
+    GRP_LABEL = GRP_LABEL_BOYS;
+    document.getElementById('schoolSubTitle').textContent = '창원경일고 — 2026학년도 입학생 기준 대교협 2028 반영과목 연계';
+    document.querySelector('.hdr h1').textContent = '📚 창원경일고 선택과목 설계 도우미';
+  }
+  
+  // Show main app
+  document.getElementById('schoolNotice').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  
+  // Reset selection state
+  Object.keys(GRP_LIMITS).forEach(g => sel.set(g, new Set()));
+  // Also clear any old group keys
+  sel.forEach((v, k) => { if (!GRP_LIMITS[k]) sel.delete(k); });
+  
+  career = '';
+  document.getElementById('careerSel').value = '';
+  
+  // Re-collapsed state
+  collapsedState.clear();
+  COLLAPSED_DEFAULT.forEach(c => collapsedState.add(c));
+  
+  renderSchedule();
+  updateSidebar();
+}
+
+// 진로 미정 가상 카드
+const UNDECIDED_CARDS={
+  "_undecided":{
+    title:"아직 잘 모르겠어요",
+    subjects:{
+      우선선택:["물리학","화학","현대사회와 윤리","세계시민과 지리"],
+      권장선택:["생명과학","경제","확률과 통계","영어 발표와 토론"],
+      확장선택:[]
+    },
+    risks:["균형 있는 선택으로 2학년 이후 계열 선택 여지를 넓히는 것을 권장합니다."]
+  },
+  "_stem":{
+    title:"이공계 가능성",
+    subjects:{
+      우선선택:["물리학","화학","미적분Ⅱ","기하"],
+      권장선택:["생명과학","인공지능 수학","역학과 에너지"],
+      확장선택:[]
+    },
+    risks:["수학(미적분Ⅱ, 기하)과 과학(물리학, 화학) 기반을 먼저 갖추면 이공계 전반으로 진로를 열 수 있습니다."]
+  },
+  "_hum":{
+    title:"인문사회 가능성",
+    subjects:{
+      우선선택:["현대사회와 윤리","세계시민과 지리","세계사","주제 탐구 독서"],
+      권장선택:["경제","법과 사회","영어 발표와 토론","사회와 문화"],
+      확장선택:[]
+    },
+    risks:["국어·영어·사회 계열 이수를 기반으로, 희망 전공에 따라 수학(경제수학, 확률통계)을 보완하는 것이 좋습니다."]
+  },
+  "_med":{
+    title:"보건·의약 가능성",
+    subjects:{
+      우선선택:["화학","생명과학","세포와 물질대사","생물의 유전"],
+      권장선택:["미적분Ⅱ","물리학","화학 반응의 세계"],
+      확장선택:[]
+    },
+    risks:["화학·생명과학 이수는 의약·보건 계열 진학의 필수 기반입니다. 수학(미적분Ⅱ)도 함께 준비하세요."]
+  },
+  "_biz":{
+    title:"경영·경제 가능성",
+    subjects:{
+      우선선택:["경제","경제 수학","실용 통계","현대사회와 윤리"],
+      권장선택:["사회와 문화","영어 발표와 토론","세계시민과 지리"],
+      확장선택:[]
+    },
+    risks:["경제·경제수학·실용통계 조합이 경영·경제 계열 진학 근거를 강화합니다."]
+  }
+};
+
+const SUBJECT_DESC={
+  "미적분Ⅱ":{type:"진로",desc:"미적분Ⅰ을 심화하여 지수·로그·삼각함수의 미분과 적분을 다룹니다.\n이공계 대학에서 가장 중요하게 평가하는 수학 과목입니다.",careers:["컴퓨터·AI","전기전자","기계","자연과학","의약계"]},
+  "기하":{type:"진로",desc:"이차곡선, 공간도형, 벡터를 다루는 과목입니다.\n공간 지각 능력과 공학적 모델링 역량을 보여주기 좋습니다.\n⚠ 수학 기초가 부족하면 학습 부담이 클 수 있습니다.",careers:["컴퓨터·AI","전기전자","기계","건축","반도체"]},
+  "인공지능 수학":{type:"진로",desc:"AI의 기반이 되는 데이터 처리, 분류, 예측, 최적화를 수학적 원리로 탐구합니다.",careers:["컴퓨터·AI","데이터사이언스","소프트웨어"]},
+  "물리학":{type:"일반",desc:"물체의 운동, 에너지, 전자기 현상의 기초 원리를 이해합니다.\n이공계 대부분의 학과에서 이수를 권장하는 핵심 과목입니다.\n⚠ 수학과 연계가 강해 수학 기초를 갖춰야 합니다.",careers:["전기전자","기계","반도체","물리학과","공학 전반"]},
+  "화학":{type:"일반",desc:"물질의 구조와 성질, 화학 반응의 규칙성을 이해합니다.\n화학공학·약학·의학·생명과학 계열 필수 과목입니다.",careers:["화학공학","약학","의예","생명·바이오","간호"]},
+  "생명과학":{type:"일반",desc:"생명 현상의 특성과 원리를 탐구합니다.\n의약·보건 계열에서 가장 중요하게 평가받는 과학 과목입니다.",careers:["의예","약학","간호·보건","생명·바이오"]},
+  "지구과학":{type:"일반",desc:"지구와 우주의 구성 및 변화 과정을 이해합니다.",careers:["자연과학","지구과학","환경"]},
+  "경제 수학":{type:"진로",desc:"수학과 경제의 융합 과목입니다. 수열과 금융, 함수와 경제현상, 미분과 경제를 탐구합니다.",careers:["경영·경제","금융","상경계열"]},
+  "역학과 에너지":{type:"진로",desc:"역학 법칙, 열 현상, 파동에 대해 심화 탐구하는 물리 진로선택 과목입니다.\n⚠ 물리학 이수 후 선택 권장.",careers:["기계","항공우주","로봇","전기전자"]},
+  "전자기와 양자":{type:"진로",desc:"전기와 자기의 상호작용, 빛의 이중성, 양자역학 기초를 탐구합니다.\n전기전자·반도체 계열 필수 심화 과목입니다.\n⚠ 물리학 이수 후 선택 권장.",careers:["전기전자","반도체","물리학과"]},
+  "화학 반응의 세계":{type:"진로",desc:"반응 속도, 촉매, 유기 화합물 등 화학 반응의 원리를 심화 학습합니다.\n⚠ 화학 이수 후 선택 권장.",careers:["약학","화학공학","의예"]},
+  "세포와 물질대사":{type:"진로",desc:"세포 구조와 생명 활동에 필요한 물질대사 과정을 분자 수준에서 탐구합니다.\n⚠ 생명과학 이수 후 선택 권장.",careers:["의예","약학","간호·보건","생명·바이오"]},
+  "생물의 유전":{type:"진로",desc:"유전의 원리와 유전자 발현, 생명공학 기술을 심화 탐구합니다.\n⚠ 생명과학 이수 후 선택 권장.",careers:["의예","약학","생명·바이오"]},
+  "물질과 에너지":{type:"진로",desc:"물질의 상태 변화, 화학 평형, 산화 환원 반응 등을 심화 탐구합니다.\n⚠ 화학 이수 후 선택 권장.",careers:["화학공학","신소재","전기전자"]},
+  "인공지능 기초":{type:"진로",desc:"인공지능의 개념, 머신러닝, 딥러닝의 기초 원리를 학습합니다.",careers:["컴퓨터·AI","소프트웨어","데이터"]},
+  "정보":{type:"일반",desc:"컴퓨팅 사고력과 프로그래밍 기초를 학습합니다.",careers:["컴퓨터·AI","소프트웨어"]},
+  "로봇과 공학세계":{type:"진로",desc:"로봇 공학의 기본 개념과 설계 원리를 탐구합니다.",careers:["기계","로봇","자동화"]},
+  "현대사회와 윤리":{type:"일반",desc:"현대사회의 다양한 윤리 문제를 탐구하는 일반선택 과목입니다.",careers:["법학","사회과학","사범","인문"]},
+  "세계시민과 지리":{type:"일반",desc:"지리적 안목으로 세계를 이해하고 지속가능한 미래를 탐구합니다.",careers:["사회과학","사범","국제관계","인문"]},
+  "세계사":{type:"일반",desc:"세계 역사의 흐름을 이해하고 현대 세계를 역사적 맥락에서 파악합니다.",careers:["인문","사범","사회과학"]},
+  "경제":{type:"진로",desc:"합리적 선택과 자원 배분, 국가 경제 흐름을 이해하는 진로선택 과목입니다.",careers:["경영·경제","금융","상경"]},
+  "사회와 문화":{type:"일반",desc:"현대 사회의 문화 현상과 사회 구조를 분석합니다.",careers:["사회과학","사회복지","심리학"]},
+  "법과 사회":{type:"진로",desc:"민주주의와 법치주의 원리를 바탕으로 생활 속 법률 관계를 이해합니다.",careers:["법학","행정","경찰"]},
+  "정치":{type:"진로",desc:"민주 정치의 원리와 국가 기관의 역할, 국제 사회의 정치 현상을 이해합니다.",careers:["법학","행정","정치학"]},
+  "주제 탐구 독서":{type:"진로",desc:"관심 주제에 관해 다양한 책을 비판적·창의적으로 읽으며 자신의 관점을 형성합니다.\n학종 세특 연계가 매우 좋은 과목입니다.",careers:["인문","언론·미디어","사범","인문사회 전반"]},
+  "영어 발표와 토론":{type:"진로",desc:"다양한 주제에 대해 영어로 발표하고 토론하는 능력을 기릅니다.",careers:["인문","경영·경제","국제관계","언론"]},
+  "실용 통계":{type:"융합",desc:"공학 도구를 활용해 실제 데이터를 수집·분석·해석하는 융합선택 과목입니다.",careers:["경영·경제","사회과학","심리학"]},
+  "인간과 심리":{type:"진로",desc:"인간의 심리 현상을 과학적으로 이해합니다.\n심리학 전공 진로와 직접 연계되는 핵심 과목입니다.",careers:["심리학","상담","사회복지"]},
+  "문학과 영상":{type:"진로",desc:"문학 작품과 영상물을 수용·생산하는 능력을 기르는 과목입니다.",careers:["언론·미디어","인문","국어국문"]},
+  "매체 의사소통":{type:"융합",desc:"디지털 매체와 의사소통 문화를 비판적으로 탐구하는 융합선택 과목입니다.",careers:["언론·미디어","커뮤니케이션"]},
+  "미술 감상과 비평":{type:"진로",desc:"미술 작품과 시각 문화를 폭넓게 감상하고 비판적으로 해석합니다.",careers:["디자인","시각예술","미술"]},
+  "음악 감상과 비평":{type:"일반",desc:"다양한 시대와 문화의 음악을 감상하고 비판적으로 이해합니다.",careers:["음악","예술","음악교육"]},
+  "독서 토론과 글쓰기":{type:"융합",desc:"다양한 분야의 글을 읽고 토론하며 논리적으로 글을 쓰는 능력을 기릅니다.",careers:["인문","사범","언론"]},
+  "윤리와 사상":{type:"진로",desc:"동·서양의 윤리사상과 사회사상을 체계적으로 학습합니다.",careers:["인문","사범","철학","법학"]},
+  "사회문제 탐구":{type:"융합",desc:"현대 사회의 구체적인 사회문제를 사회과학적 방법으로 탐구합니다.",careers:["사회과학","사회복지","행정"]},
+  "언어생활 탐구":{type:"융합",desc:"일상의 언어생활에서 다양한 주제를 발견하여 탐구합니다.",careers:["국어국문","사범·국어교육"]},
+  "논리와 사고":{type:"진로",desc:"타당한 추론 규칙을 익히고 비판적 사고력을 기릅니다.",careers:["인문","철학","사범"]},
+  "확률과 통계":{type:"일반",desc:"데이터 기반의 확률적·통계적 소양을 기르는 과목입니다.\n경영·사회과학 계열에서 활용도가 높습니다.",careers:["경영·경제","사회과학","자연과학 전반"]},
+  "대수":{type:"일반",desc:"지수함수, 로그함수, 삼각함수, 수열을 다루는 과목입니다.\n이공계 전반에서 중요한 기초 수학 과목입니다.",careers:["이공계 전반"]},
+  "미적분Ⅰ":{type:"일반",desc:"함수의 극한, 미분, 적분의 기초를 이해하는 과목입니다.",careers:["이공계 전반"]},
+  "지구시스템과학":{type:"진로",desc:"지구 내부와 표면의 변화, 대기와 해양의 순환을 지구 시스템 관점에서 탐구합니다.",careers:["지구과학","환경","자연과학"]},
+  "도시의 미래 탐구":{type:"진로",desc:"도시의 변화를 탐색하고 도시 문제에 대한 사회과학적 분석을 통해 미래 도시를 구상합니다.",careers:["도시공학","사회과학","건축"]},
+  "행성우주과학":{type:"진로",desc:"천체 및 우주과학 관련 개념을 이해하고, 관측 데이터를 바탕으로 우주적 현상을 탐구합니다.",careers:["천문학","물리학","우주공학"]},
+  "융합과학 탐구":{type:"융합",desc:"과학적 원리를 바탕으로 기술, 공학 등 다양한 분야와 융합하여 실생활의 문제를 창의적으로 해결합니다.",careers:["이공계 전반","융합인재"]},
+  "인문학과 윤리":{type:"진로",desc:"고전에 대한 탐구와 성찰을 통해 인문학적 소양을 기르고 도덕적 딜레마를 비판적으로 사유합니다.",careers:["인문","철학","사범"]},
+  "심화 영어 독해와 작문":{type:"진로",desc:"심도 있는 영어 지문을 읽고 분석하며, 학문적 글쓰기 능력을 집중적으로 기릅니다.",careers:["영어영문","국제관계","인문 전반"]},
+  "금융과 경제생활":{type:"융합",desc:"실생활의 금융 현상, 자산 관리, 신용 등을 다루며 실용적 금융·경제 역량을 기릅니다.",careers:["경영·경제","금융"]},
+  "기후변화와 환경생태":{type:"융합",desc:"기후변화가 초래하는 환경과 생태계의 변화를 이해하고, 친환경적 해결책을 모색합니다.",careers:["환경","생태학","지구과학"]},
+  "윤리문제 탐구":{type:"융합",desc:"생명, 정보, 환경, 문화 등 구체적인 윤리적 쟁점에 대해 탐구하고 실천 방안을 모색합니다.",careers:["인문","철학","의약윤리"]},
+  "기후변화와 지속가능한 세계":{type:"융합",desc:"기후 위기의 복합적 원인을 분석하고, 인류의 지속가능한 발전을 위한 방안을 탐색합니다.",careers:["환경","사회과학","지구과학"]}
+};
+
+const _SEMESTERS_ORIGINAL_UNUSED_=[
+  {code:"1-1",label:"1학년 1학기",cls:"hdr-11",
+   fixed:["공통국어1","공통수학1","공통영어1","한국사1","통합사회1","통합과학1","과학탐구실험1","체육1","미술(교차)"],groups:[]},
+  {code:"1-2",label:"1학년 2학기",cls:"hdr-12",
+   fixed:["공통국어2","공통수학2","공통영어2","한국사2","통합사회2","통합과학2","과학탐구실험2","체육2","음악(교차)"],groups:[]},
+  {code:"2-1",label:"2학년 1학기",cls:"hdr-21",
+   fixed:["문학","대수","영어Ⅰ","스포츠 생활1"],
+   groups:[
+     {code:"A",label:"국·영·수 계열 [택1]",limit:1,
+      subs:["주제 탐구 독서","문학과 영상","영미 문학 읽기","인공지능 수학","실용 통계"]},
+     {code:"B",label:"사회·과학 탐구 [택3]",limit:3,
+      subs:["세계시민과 지리","세계사","현대사회와 윤리","사회와 문화","법과 사회","물리학","화학","생명과학","지구과학"]}
+   ]},
+  {code:"2-2",label:"2학년 2학기",cls:"hdr-22",
+   fixed:["화법과 언어","미적분Ⅰ","영어Ⅱ","스포츠 생활2"],
+   groups:[
+     {code:"D",label:"국·영·수 계열 [택1]",limit:1,
+      subs:["독서 토론과 글쓰기","영어 발표와 토론","기하"]},
+     {code:"E",label:"사회·과학 탐구 [택3]",limit:3,
+      subs:["도시의 미래 탐구","동아시아 역사 기행","윤리와 사상","정치","경제","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학"]},
+     {code:"F",label:"기술·가정·정보·제2외국어 [택1]",limit:1,
+      subs:["로봇과 공학세계","인공지능 기초","일본 문화","중국 문화"]},
+     {code:"G",label:"제2외국어 [택1]",limit:1,
+      subs:["일본어","중국어"]}
+   ]},
+  {code:"3-1",label:"3학년 1학기",cls:"hdr-31",
+   fixed:["독서와 작문","확률과 통계","심화 영어Ⅰ"],
+   groups:[
+     {code:"H",label:"국·영·수 계열 [택1]",limit:1,
+      subs:["언어생활 탐구","심화 영어 독해와 작문","경제 수학","미적분Ⅱ"]},
+     {code:"I",label:"사회·과학 탐구 [택3]",limit:3,
+      subs:["한국지리 탐구","금융과 경제생활","사회문제 탐구","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","물리학 실험","화학 실험","생명과학 실험"]},
+     {code:"K",label:"교양 [택1]",limit:1,
+      subs:["생태와 환경","인간과 심리"]}
+   ]},
+  {code:"3-2",label:"3학년 2학기",cls:"hdr-32",
+   fixed:["독서 토론과 글쓰기","실용 통계","심화 영어Ⅱ"],
+   groups:[
+     {code:"L",label:"국·영·수 계열 [택1]",limit:1,
+      subs:["매체 의사소통","미디어 영어","고급 미적분"]},
+     {code:"M",label:"사회·과학 탐구 [택2]",limit:2,
+      subs:["여행지리","윤리문제 탐구","역사로 탐구하는 현대 세계","융합과학 탐구","과학의 역사와 문화","기후변화와 환경생태"]}
+   ]}
+];
+
+const _GRP_LIMITS_ORIGINAL_UNUSED_={"A":1,"B":3,"G":1,"D":1,"E":3,"F":1,"H":1,"I":3,"K":1,"L":1,"M":2};
+const _GRP_LABEL_ORIGINAL_UNUSED_={
+  "A":"2학년 1학기 — 국·영·수 계열 (1개 선택)",
+  "B":"2학년 1학기 — 사회·과학 탐구 (3개 선택)",
+  "D":"2학년 2학기 — 국·영·수 계열 (1개 선택)",
+  "E":"2학년 2학기 — 사회·과학 탐구 (3개 선택)",
+  "G":"2학년 2학기 — 제2외국어 (1개 선택)",
+  "F":"2학년 2학기 — 기술·정보·제2외국어 (1개 선택)",
+  "H":"3학년 1학기 — 국·영·수 계열 (1개 선택)",
+  "I":"3학년 1학기 — 사회·과학 탐구 (3개 선택)",
+  "K":"3학년 1학기 — 교양 (1개 선택)",
+  "L":"3학년 2학기 — 국·영·수 계열 (1개 선택)",
+  "M":"3학년 2학기 — 사회·과학 탐구 (2개 선택)"
+};
+
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+const sel=new Map();
+// sel is populated dynamically by selectSchool()
+let career='';
+
+// 1·2학년 학기는 접힌 상태로 시작
+const COLLAPSED_DEFAULT=new Set(['1-1','1-2']);
+const collapsedState=new Set(COLLAPSED_DEFAULT);
+
+// ════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════
+function getCareerData(){
+  if(!career)return null;
+  if(UNDECIDED_CARDS[career])return UNDECIDED_CARDS[career];
+  return CARDS.find(c=>c.title===career)||null;
+}
+function getPri(){const d=getCareerData();return new Set(d?d.subjects['우선선택']||[]:[]);}
+function getRec(){const d=getCareerData();return new Set(d?d.subjects['권장선택']||[]:[]);}
+function allSel(){const s=new Set();sel.forEach(v=>v.forEach(n=>s.add(n)));return s;}
+
+function hlCls(name){
+  if(!career)return'';
+  if(getPri().has(name))return' hl-pri';
+  if(getRec().has(name))return' hl-rec';
+  return'';
+}
+
+// ════════════════════════════════════════
+// RENDER SCHEDULE
+// ════════════════════════════════════════
+function renderSchedule(){
+  const wrap=document.getElementById('schedWrap');
+  wrap.innerHTML='';
+  const pri=getPri(),rec=getRec();
+
+  SEMESTERS.forEach(sem=>{
+    const isCollapsed=collapsedState.has(sem.code);
+    const selCount=sem.groups.reduce((a,g)=>a+(sel.get(g.code)||new Set()).size,0);
+    const div=document.createElement('div');
+    div.className='sem-block'+(isCollapsed?' collapsed':'');
+    div.id='sem-'+sem.code;
+
+    // count highlights in this semester
+    const hlCount=sem.groups.reduce((a,g)=>
+      a+g.subs.filter(s=>pri.has(s)||rec.has(s)).length,0);
+    const hlBadge=hlCount&&career?` <span style="font-size:.67rem;background:rgba(255,255,255,.2);padding:1px 6px;border-radius:8px">${hlCount}개 핵심</span>`:'';
+
+    div.innerHTML=`<div class="sem-hdr ${sem.cls}" onclick="toggleSem('${sem.code}')">
+      <span>${sem.label}${hlBadge}</span>
+      <div class="sem-right">
+        ${selCount?`<span class="sem-sub">✓ ${selCount}개 선택됨</span>`:'<span class="sem-sub">'+(sem.groups.length?'선택 전':'공통 과목')+'</span>'}
+        <span class="sem-toggle">▾</span>
+      </div>
+    </div>
+    <div class="sem-body">
+      ${sem.fixed.length?`<div class="fixed-row">${sem.fixed.map(f=>`<span class="fixed-tag" onclick="openPopup('${esc(f)}')" title="클릭하여 과목 설명 보기">${f}</span>`).join('')}</div>`:''}
+      ${sem.groups.map(g=>{
+        const cur=sel.get(g.code)||new Set();
+        const cnt=cur.size,lim=GRP_LIMITS[g.code];
+        let cntCls=cnt===0?'cnt-empty':cnt===lim?'cnt-ok':cnt>lim?'cnt-over':'cnt-partial';
+        return`<div class="grp-section">
+          <div class="grp-header">
+            <span class="grp-code">${g.code}군</span>
+            <span class="grp-label">${g.label}</span>
+            <span class="grp-counter ${cntCls}">${cnt}/${lim}</span>
+          </div>
+          <div class="subj-row">
+            ${g.subs.map(s=>{
+              const isSel=cur.has(s);
+              const hl=hlCls(s);
+              return`<button class="subj-btn g-${g.code}${isSel?' sel':''}${hl}"
+                onclick="toggleSubj('${g.code}','${esc(s)}',${lim})"
+                oncontextmenu="openPopup('${esc(s)}');return false"
+                title="${isSel?'선택됨 — 클릭하면 해제':'클릭하여 선택 (우클릭=과목 설명)'}"
+              ><span class="chk">✓</span>${s}</button>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+    wrap.appendChild(div);
+  });
+}
+
+function esc(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+
+function toggleSem(code){
+  if(collapsedState.has(code))collapsedState.delete(code);
+  else collapsedState.add(code);
+  const block=document.getElementById('sem-'+code);
+  if(block)block.classList.toggle('collapsed');
+}
+
+// ════════════════════════════════════════
+// TOGGLE SUBJECT
+// ════════════════════════════════════════
+function toggleSubj(grpCode,name,limit){
+  const s=sel.get(grpCode);
+  if(s.has(name)){s.delete(name);}
+  else{
+    if(s.size>=limit){const first=s.values().next().value;s.delete(first);}
+    s.add(name);
+  }
+  renderSchedule();
+  updateSidebar();
+}
+
+// ════════════════════════════════════════
+// SIDEBAR
+// ════════════════════════════════════════
+function updateSidebar(){
+  updateAch();
+  updateGC();
+  updateSelWrap();
+}
+
+function updateAch(){
+  const card=document.getElementById('achCard');
+  const d=getCareerData();
+  if(!career||!d){
+    card.innerHTML='<div class="sb-title">📊 진로 달성률</div><p class="sb-empty">① 위에서 희망 진로를 선택하면<br>핵심 과목 달성률을 확인할 수 있습니다.</p>';
+    return;
+  }
+  const my=allSel();
+  const pri=d.subjects['우선선택']||[];
+  const rec=d.subjects['권장선택']||[];
+  const priDone=pri.filter(s=>my.has(s)).length;
+  const recDone=rec.filter(s=>my.has(s)).length;
+  const missPri=pri.filter(s=>!my.has(s));
+  const missRec=rec.filter(s=>!my.has(s));
+  const priPct=pri.length?Math.round(priDone/pri.length*100):100;
+  const recPct=rec.length?Math.round(recDone/rec.length*100):100;
+  const pCls=priPct===100?'full':priPct>0?'part':'none';
+  const rCls=recPct===100?'full':recPct>0?'part':'none';
+
+  let html=`<div class="sb-title">📊 진로 달성률<span style="font-size:.67rem;font-weight:400;color:var(--ink-l);margin-left:5px">${d.title||career}</span></div>`;
+  if(pri.length){
+    html+=`<div class="prog-item">
+      <div class="prog-label"><span class="prog-name">★ 우선선택</span><span class="prog-score ${pCls}">${priDone}/${pri.length} (${priPct}%)</span></div>
+      <div class="prog-track"><div class="prog-fill pri" style="width:${priPct}%"></div></div>
+      ${missPri.length?`<div class="miss-row">${missPri.map(s=>`<span class="miss-chip">${s}</span>`).join('')}</div>`:'<p style="font-size:.67rem;color:var(--rec);margin-top:3px">✓ 모두 선택 완료!</p>'}
+    </div>`;
+  }
+  if(rec.length){
+    html+=`<div class="prog-item">
+      <div class="prog-label"><span class="prog-name">◎ 권장선택</span><span class="prog-score ${rCls}">${recDone}/${rec.length} (${recPct}%)</span></div>
+      <div class="prog-track"><div class="prog-fill rec" style="width:${recPct}%"></div></div>
+      ${missRec.length?`<div class="miss-row">${missRec.map(s=>`<span class="rec-chip">${s}</span>`).join('')}</div>`:'<p style="font-size:.67rem;color:var(--rec);margin-top:3px">✓ 모두 선택 완료!</p>'}
+    </div>`;
+  }
+  if(d.risks&&d.risks.length&&missPri.length){
+    const rel=d.risks.filter(r=>missPri.some(s=>r.includes(s)));
+    if(rel.length)html+=`<div class="risk-note">${rel.slice(0,2).map(r=>'⚠ '+r).join('<br>')}</div>`;
+  }
+  card.innerHTML=html;
+}
+
+function updateGC(){
+  const wrap=document.getElementById('gcWrap');
+  let any=false;
+  let html='';
+  Object.entries(GRP_LIMITS).forEach(([code,lim])=>{
+    const cnt=(sel.get(code)||new Set()).size;
+    if(cnt===0)return;
+    any=true;
+    let cls='gc-partial',txt=`${cnt}/${lim} 부족`;
+    if(cnt===lim){cls='gc-ok';txt=`${cnt}/${lim} ✓`;}
+    else if(cnt>lim){cls='gc-over';txt=`${cnt}/${lim} 초과!`;}
+    html+=`<div class="gc-row">
+      <span class="gc-code">${code}군</span>
+      <span class="gc-name">${GRP_LABEL[code]||code}</span>
+      <span class="gc-badge ${cls}">${txt}</span>
+    </div>`;
+  });
+  // also show uncompleted groups that have partial
+  // show empty groups too (as summary)
+  let emptyHtml='';
+  Object.entries(GRP_LIMITS).forEach(([code,lim])=>{
+    const cnt=(sel.get(code)||new Set()).size;
+    if(cnt===0){
+      emptyHtml+=`<div class="gc-row">
+        <span class="gc-code">${code}군</span>
+        <span class="gc-name">${GRP_LABEL[code]||code}</span>
+        <span class="gc-badge gc-empty">0/${lim} 미선택</span>
+      </div>`;
+    }
+  });
+  wrap.innerHTML=html+emptyHtml||(any?html:`<p class="sb-empty">과목을 선택하면 현황이 표시됩니다.</p>`);
+  if(!html&&!emptyHtml) wrap.innerHTML='<p class="sb-empty">과목을 선택하면 현황이 표시됩니다.</p>';
+}
+
+function updateSelWrap(){
+  const wrap=document.getElementById('selWrap');
+  const my=allSel();
+  if(my.size===0){wrap.innerHTML='<p class="sb-empty">과목을 선택하면 여기에 표시됩니다.</p>';return;}
+  const pri=getPri(),rec=getRec();
+  const chips=[...my].map(s=>`<span class="sel-chip${pri.has(s)?' pri':rec.has(s)?' rec':''}">${s}${pri.has(s)?' ★':rec.has(s)?' ◎':''}</span>`).join('');
+  wrap.innerHTML=`<div style="font-size:.69rem;color:var(--ink-l);margin-bottom:5px">총 ${my.size}개 선택됨</div><div class="sel-chips">${chips}</div>`;
+}
+
+// ════════════════════════════════════════
+// CAREER CHANGE
+// ════════════════════════════════════════
+function onCareerChange(){
+  career=document.getElementById('careerSel').value;
+  // 핵심 과목이 있는 학기는 자동으로 펼침
+  if(career){
+    const pri=getPri(),rec=getRec();
+    SEMESTERS.forEach(sem=>{
+      const hasHL=sem.groups.some(g=>g.subs.some(s=>pri.has(s)||rec.has(s)));
+      if(hasHL)collapsedState.delete(sem.code);
+    });
+  }
+  renderSchedule();
+  updateSidebar();
+}
+
+// ════════════════════════════════════════
+// POPUP
+// ════════════════════════════════════════
+function openPopup(name){
+  const d=SUBJECT_DESC[name];
+  document.getElementById('popName').textContent=name;
+  const badge=document.getElementById('popBadge');
+  if(d){
+    badge.textContent={진로:'진로선택',일반:'일반선택',융합:'융합선택',공통:'공통과목'}[d.type]||d.type;
+    badge.className='pop-badge t-'+d.type;
+    document.getElementById('popDesc').textContent=d.desc;
+    document.getElementById('popTags').innerHTML=d.careers.map(c=>`<span class="pop-tag">🎯 ${c}</span>`).join('');
+  } else {
+    badge.textContent='';badge.className='pop-badge';
+    document.getElementById('popDesc').textContent='상세 설명 준비 중입니다.\n진로진학상담교사에게 문의하세요.';
+    document.getElementById('popTags').innerHTML='';
+  }
+  document.getElementById('popOverlay').classList.add('on');
+}
+function closePopup(){document.getElementById('popOverlay').classList.remove('on');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePopup();closeSummary();}});
+
+// ════════════════════════════════════════
+// SUMMARY
+// ════════════════════════════════════════
+function openSummary(){buildSum();document.getElementById('sumModal').classList.add('on');}
+function closeSummary(){document.getElementById('sumModal').classList.remove('on');}
+
+function buildSum(){
+  const my=allSel();
+  const d=getCareerData();
+  const pri=d?d.subjects['우선선택']||[]:[];
+  const rec=d?d.subjects['권장선택']||[]:[];
+  const priDone=pri.filter(s=>my.has(s)).length;
+  const recDone=rec.filter(s=>my.has(s)).length;
+  const missPri=pri.filter(s=>!my.has(s));
+  const conflicts=Object.entries(GRP_LIMITS).filter(([c,l])=>(sel.get(c)||new Set()).size>l).map(([c])=>`${c}군 초과`);
+  const incomplete=Object.entries(GRP_LIMITS).filter(([c,l])=>{const n=(sel.get(c)||new Set()).size;return n>0&&n<l;}).map(([c,l])=>`${c}군 미달(${(sel.get(c)||new Set()).size}/${l})`);
+
+  const hasMathAdv=my.has('미적분Ⅱ')||my.has('기하');
+  const hasSci=my.has('물리학')||my.has('화학')||my.has('생명과학');
+  const hasSciAdv=['역학과 에너지','전자기와 양자','물질과 에너지','화학 반응의 세계','세포와 물질대사','생물의 유전'].some(s=>my.has(s));
+  const hasSoc=['현대사회와 윤리','경제','사회와 문화','세계시민과 지리','세계사'].some(s=>my.has(s));
+  const safety=Math.min(100,(hasMathAdv?30:0)+(hasSci?25:0)+(hasSciAdv?20:0)+(hasSoc?15:0));
+  const safetyTxt=safety>=65?'계열 변경 가능성 열려 있음':safety>=40?'일부 계열 변경 시 보완 필요':'현재 선택 계열에 집중된 구성';
+
+  const bySem={};
+  sel.forEach((names,grp)=>{
+    names.forEach(name=>{
+      for(const sem of SEMESTERS){
+        for(const g of sem.groups){
+          if(g.code===grp&&g.subs.includes(name)){
+            if(!bySem[sem.label])bySem[sem.label]=[];
+            bySem[sem.label].push({name,isPri:pri.includes(name),isRec:rec.includes(name)});
+          }
+        }
+      }
+    });
+  });
+
+  let html=`<div class="sum-section"><h3>📌 기본 정보</h3>
+    <div class="sum-row"><span class="sum-key">희망 진로</span><span class="sum-val">${d?d.title||career:'미설정'}</span></div>
+    <div class="sum-row"><span class="sum-key">선택 과목 수</span><span class="sum-val">${my.size}개</span></div>
+    <div class="sum-row"><span class="sum-key">우선선택 달성</span><span class="sum-val ${priDone===pri.length?'g':'b'}">${priDone}/${pri.length}</span></div>
+    <div class="sum-row"><span class="sum-key">권장선택 달성</span><span class="sum-val ${recDone===rec.length?'g':'w'}">${recDone}/${rec.length}</span></div>
+    <div class="sum-row"><span class="sum-key">선택군 충돌</span><span class="sum-val ${conflicts.length?'b':'g'}">${conflicts.length?conflicts.join(', '):'없음'}</span></div>
+    ${incomplete.length?`<div class="sum-row"><span class="sum-key">선택군 미달</span><span class="sum-val w">${incomplete.join(', ')}</span></div>`:''}
+  </div>`;
+
+  if(missPri.length){
+    html+=`<div class="sum-section"><h3 style="color:var(--pri)">⚠ 핵심 과목 누락</h3>
+      <div class="miss-row" style="margin-bottom:8px">${missPri.map(s=>`<span class="miss-chip" style="font-size:.74rem;padding:3px 10px">${s}</span>`).join('')}</div>
+      ${d&&d.risks?`<div class="risk-note">${d.risks.filter(r=>missPri.some(s=>r.includes(s))).map(r=>'• '+r).join('<br>')}</div>`:''}
+    </div>`;
+  }
+
+  if(Object.keys(bySem).length){
+    html+=`<div class="sum-section"><h3>📅 학기별 선택 과목</h3>
+      ${Object.entries(bySem).map(([lbl,subs])=>`
+        <div style="margin-bottom:9px">
+          <div style="font-size:.71rem;font-weight:700;color:var(--acc);margin-bottom:4px">${lbl}</div>
+          <div class="sel-chips">${subs.map(({name,isPri,isRec})=>`<span class="sel-chip${isPri?' pri':isRec?' rec':''}">${name}${isPri?' ★':isRec?' ◎':''}</span>`).join('')}</div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  html+=`<div class="sum-section"><h3>🔄 계열 변경 안전성</h3>
+    <div style="height:7px;background:#e2e8f0;border-radius:4px;margin-bottom:5px;overflow:hidden">
+      <div style="height:100%;width:${safety}%;background:${safety>=65?'linear-gradient(90deg,#059669,#34d399)':safety>=40?'linear-gradient(90deg,#d97706,#fbbf24)':'linear-gradient(90deg,#dc2626,#f87171)'};border-radius:4px;transition:width .5s"></div>
+    </div>
+    <div style="font-size:.72rem;color:var(--ink-m)">${safety}점 — ${safetyTxt}</div>
+  </div>`;
+
+  html+=`<div class="sum-section"><h3>📝 상담 메모 (교사용)</h3>
+    <textarea class="memo-box" id="sumMemo" placeholder="상담 내용, 학생 상황, 보완 제안 등을 메모하세요.&#10;&#10;예) 수학 부담 호소 → 기하 대신 경제수학 검토&#10;   물리학 미선택 → 역학과 에너지로 보완 계획"></textarea>
+  </div>`;
+
+  document.getElementById('sumContent').innerHTML=html;
+}
+
+function copyResult(){
+  const my=allSel();
+  const d=getCareerData();
+  const pri=d?d.subjects['우선선택']||[]:[];
+  const priDone=pri.filter(s=>my.has(s)).length;
+  const miss=pri.filter(s=>!my.has(s));
+  const memo=document.getElementById('sumMemo');
+  const txt=`[${currentSchool==='girls'?'창원경일여고':'창원경일고'} 선택과목 상담 결과]
+희망 진로: ${d?d.title||career:'미설정'}
+선택 과목(${my.size}개): ${[...my].join(', ')}
+우선선택 달성: ${priDone}/${pri.length}
+${miss.length?'핵심 누락: '+miss.join(', '):'핵심 과목 모두 선택 완료'}
+${memo&&memo.value?'\n[상담 메모]\n'+memo.value:''}`;
+  navigator.clipboard.writeText(txt)
+    .then(()=>alert('결과가 클립보드에 복사됐습니다.'))
+    .catch(()=>{if(memo){memo.select();document.execCommand('copy');}});
+}
+
+// ════════════════════════════════════════
+// CLEAR
+// ════════════════════════════════════════
+function clearAll(){
+  if(!confirm('모든 선택을 초기화할까요?'))return;
+  Object.keys(GRP_LIMITS).forEach(g=>sel.set(g,new Set()));
+  sel.forEach((v,k)=>{if(!GRP_LIMITS[k])sel.delete(k);});
+  renderSchedule();
+  updateSidebar();
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+(function(){
+  // Populate career dropdown (CARDS data is school-agnostic)
+  const s=document.getElementById('careerSel');
+  const og=s.querySelector('optgroup:last-of-type');
+  CARDS.forEach(c=>{
+    const o=document.createElement('option');
+    o.value=c.title;o.textContent=c.title+' ('+c.category+')';
+    og.appendChild(o);
+  });
+  // Do NOT call renderSchedule/updateSidebar here — wait for school selection
+})();
+</script>
+
+<script>
+/* v3: 포털(gyeongil.school)과 학교 선택 양방향 동기화
+   - 포털에서 학교를 골랐으면 자동으로 해당 편제표 로드
+   - 이 화면에서 바꾸면 포털·전 앱에 반영 (사용자 변경 기능 유지) */
+(function () {
+  'use strict';
+  if (typeof selectSchool !== 'function') return;
+  var orig = selectSchool;
+  selectSchool = function (code) {
+    orig(code);
+    if (window.GyeongilPortal) window.GyeongilPortal.setSchoolByCode(code);
+  };
+  var saved = window.GyeongilPortal && window.GyeongilPortal.getSchoolCode();
+  if (saved) selectSchool(saved);
+})();
+</script>
+
+<style>
+/* v3: A4 인쇄 최적화 */
+@page { size: A4; margin: 12mm; }
+@media print {
+  body.print-summary .main, body.print-summary .hdr,
+  body.print-summary .school-bar, body.print-summary .career-bar { display: none !important; }
+  body.print-summary .sum-modal { display: block !important; position: static !important;
+    width: auto !important; max-width: none !important; box-shadow: none !important; }
+  body.print-summary .sum-modal * { max-height: none !important; overflow: visible !important; }
+  body.print-summary .sbtn { display: none !important; }
+}
+</style>
+<script>
+/* v3: 상담 요약이 열려 있으면 요약만 인쇄 */
+(function () {
+  window.addEventListener('beforeprint', function () {
+    var m = document.querySelector('.sum-modal');
+    if (m && getComputedStyle(m).display !== 'none') document.body.classList.add('print-summary');
+  });
+  window.addEventListener('afterprint', function () {
+    document.body.classList.remove('print-summary');
+  });
+})();
+</script>
+</body>
+</html>
