@@ -273,12 +273,12 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
   <label>🏫 학교 선택</label>
   <div class="school-btns">
     <button class="school-btn" id="btnGirls" onclick="selectSchool('girls')">
-      <span class="school-icon">👩</span>
+      <img class="school-logo" src="../common/img/logo-girls.webp" alt="창원경일여고 교표" onerror="this.hidden=true">
       <span class="school-name">창원경일여고</span>
       <span class="school-desc">여자고등학교 편제표</span>
     </button>
     <button class="school-btn" id="btnBoys" onclick="selectSchool('boys')">
-      <span class="school-icon">👦</span>
+      <img class="school-logo" src="../common/img/logo-boys.webp" alt="창원경일고 교표" onerror="this.hidden=true">
       <span class="school-name">창원경일고</span>
       <span class="school-desc">남자고등학교 편제표</span>
     </button>
@@ -1137,6 +1137,8 @@ function clearAll(){
 #popImgWrap .pi-box{max-height:46vh;overflow:auto;border-radius:8px;border:1px solid rgba(148,163,184,.25)}
 #popImgWrap img{width:100%;display:block}
 @media print{.qico{display:none!important}}
+.school-logo{width:28px;height:28px;border-radius:50%;background:#fff;flex:0 0 auto;
+  box-shadow:0 0 0 2px rgba(255,255,255,.15)}
 </style>
 
 <script src="../common/subject-images.js"></script>
