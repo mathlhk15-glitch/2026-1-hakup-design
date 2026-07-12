@@ -47,7 +47,7 @@
 
 ### portal.css — 포털 전용 스타일
 하위 앱에는 로드되지 않는다(앱 CSS와 충돌 방지). 학교 구분색 토큰:
-`--boys #185ca8(파랑)` / `--girls #c2185b(로즈)`.
+`--boys #128a43(교표 초록)` / `--girls #e8501e(교표 오렌지레드)`. 교표 파일: `common/img/logo-boys.webp`, `logo-girls.webp`.
 
 ## Navigation 구조
 

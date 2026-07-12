@@ -1179,5 +1179,43 @@ function clearAll(){
   };
 })();
 </script>
+
+<script>
+/* v3.3: 상담 요약 상단에 학교 교표 + 학교명 (화면·인쇄 공통) */
+(function () {
+  'use strict';
+  if (typeof openSummary !== 'function') return;
+  var orig = openSummary;
+  openSummary = function () {
+    orig();
+    var box = document.querySelector('#sumModal .sum-box');
+    if (!box) return;
+    var head = document.getElementById('sumSchoolHead');
+    if (!head) {
+      head = document.createElement('div');
+      head.id = 'sumSchoolHead';
+      box.insertBefore(head, box.firstChild);
+    }
+    var code = (typeof currentSchool !== 'undefined' && currentSchool) ||
+               (window.GyeongilPortal && window.GyeongilPortal.getSchoolCode()) || 'boys';
+    var name = code === 'girls' ? '창원경일여자고등학교' : '창원경일고등학교';
+    head.innerHTML =
+      '<img src="../common/img/logo-' + code + '.webp" alt="" onerror="this.hidden=true">' +
+      '<div><div class="ssh-name">' + name + '</div>' +
+      '<div class="ssh-sub">2026학년도 입학생 선택과목 상담 자료</div></div>';
+  };
+})();
+</script>
+<style>
+#sumSchoolHead{display:flex;align-items:center;gap:12px;padding:4px 2px 12px;margin-bottom:10px;
+  border-bottom:2px solid rgba(148,163,184,.3)}
+#sumSchoolHead img{width:44px;height:44px;border-radius:50%;background:#fff}
+#sumSchoolHead .ssh-name{font-weight:900;font-size:1.05rem}
+#sumSchoolHead .ssh-sub{font-size:.75rem;color:#94a3b8}
+@media print{
+  #sumSchoolHead{border-bottom-color:#333}
+  #sumSchoolHead .ssh-sub{color:#555}
+}
+</style>
 </body>
 </html>

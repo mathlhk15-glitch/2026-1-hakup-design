@@ -16,8 +16,8 @@
     <div class="school-picker" role="group" aria-label="학교 선택">
       <span id="school-picker-label">🏫 먼저, 우리 학교를 선택하세요</span>
       <div class="segments">
-        <button type="button" data-school="창원경일고" aria-pressed="false">창원경일고</button>
-        <button type="button" data-school="창원경일여고" aria-pressed="false">창원경일여고</button>
+        <button type="button" data-school="창원경일고" aria-pressed="false"><img src="common/img/logo-boys.webp" alt="" onerror="this.hidden=true">창원경일고</button>
+        <button type="button" data-school="창원경일여고" aria-pressed="false"><img src="common/img/logo-girls.webp" alt="" onerror="this.hidden=true">창원경일여고</button>
       </div>
       <p id="school-status" aria-live="polite">학교를 선택하면 이 기기에 기억됩니다.</p>
     </div>
@@ -92,6 +92,10 @@
     <span>학과·과목 설명 원자료: 전남여고 진로진학상담교사 김동석 선생님 제작 자료를 재구성</span>
   </footer>
 
+  <div class="stamp-overlay" id="stampOverlay" aria-hidden="true">
+    <div class="stamp"><img id="stampImg" src="" alt=""><div class="stamp-name" id="stampName"></div></div>
+  </div>
+
   <script src="common/navigation.js" data-no-nav></script>
   <script>
     /* 포털 학교 선택 — GyeongilPortal 공통 상태 사용 (키: gyeongil.school) */
@@ -113,13 +117,25 @@
           const cta = document.getElementById('cta-choice');
           if (cta) {
             cta.textContent = school + ' 편제표로 설계 →';
-            cta.style.background = CODE[school] === 'girls' ? '#c2185b' : '#185ca8';
+            cta.style.background = CODE[school] === 'girls' ? '#e8501e' : '#128a43';
           }
         }
+      }
+      // ② 교표 스탬프: 학교를 '선택하는 순간'의 피드백 (복원 시에는 실행 안 함)
+      let stampTimer = null;
+      function showStamp(school) {
+        const ov = document.getElementById('stampOverlay');
+        const code = CODE[school];
+        document.getElementById('stampImg').src = 'common/img/logo-' + code + '.webp';
+        document.getElementById('stampName').textContent = school;
+        ov.className = 'stamp-overlay on ' + code;
+        clearTimeout(stampTimer);
+        stampTimer = setTimeout(() => { ov.className = 'stamp-overlay'; }, 1300);
       }
       buttons.forEach(button => button.addEventListener('click', () => {
         window.GyeongilPortal.setSchool(button.dataset.school);
         paint(button.dataset.school);
+        showStamp(button.dataset.school);
       }));
       paint(window.GyeongilPortal.getSchool());
     })();

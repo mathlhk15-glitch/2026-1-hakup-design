@@ -16,6 +16,10 @@
 (function () {
   'use strict';
 
+  // v3.3: 이 스크립트 위치 기준 이미지 경로 (포털/하위앱 어디서든 동일 동작)
+  const SCRIPT_EL = document.currentScript;
+  const IMG_BASE = (SCRIPT_EL && SCRIPT_EL.src ? SCRIPT_EL.src.replace(/navigation\.js.*$/, '') : '../common/') + 'img/';
+
   // ── 학교 상태 공통 모듈 (모든 앱이 동일 상태 공유) ──────────────
   const KEY = 'gyeongil.school';
   const NAME_TO_CODE = { '창원경일고': 'boys', '창원경일여고': 'girls' };
@@ -39,13 +43,28 @@
     if (!NAME_TO_CODE[name]) return;
     try { localStorage.setItem(KEY, name); } catch (e) { /* 사생활 모드 등 */ }
     paintBadge();
+    updateFavicon();
   }
+  // ⑥ 동적 파비콘: 선택한 학교의 교표 (미선택 시 경일고 교표 기본)
+  function updateFavicon() {
+    const code = NAME_TO_CODE[getSchool()] || 'boys';
+    let link = document.querySelector('link[rel="icon"][data-gyeongil]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      link.setAttribute('data-gyeongil', '');
+      document.head.appendChild(link);
+    }
+    link.href = IMG_BASE + 'logo-' + code + '.webp';
+  }
+
   window.GyeongilPortal = {
     getSchool: getSchool,
     setSchool: setSchool,
     getSchoolCode: function () { return NAME_TO_CODE[getSchool()] || null; },
     setSchoolByCode: function (code) { if (CODE_TO_NAME[code]) setSchool(CODE_TO_NAME[code]); }
   };
+  updateFavicon();
 
   // ── 내비게이션 바 (중복 삽입 방지 · 포털(root)에서는 data-no-nav로 생략) ──
   if (document.currentScript && document.currentScript.hasAttribute('data-no-nav')) return;
@@ -72,8 +91,9 @@
     .gyeongil-nav a[aria-current="page"]{background:#e0a126;color:#17212a}
     .gyeongil-nav__meta{flex:0 0 auto;margin-left:auto;display:inline-flex;align-items:center;gap:8px;color:#cbdce2;font-size:11px;white-space:nowrap}
     .gyeongil-nav__school{display:none;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800}
-    .gyeongil-nav__school.boys{display:inline-flex;background:#dbeafe;color:#185ca8}
-    .gyeongil-nav__school.girls{display:inline-flex;background:#fce7f3;color:#c2185b}
+    .gyeongil-nav__school.boys{display:inline-flex;background:#d9f2e3;color:#0e6b33}
+    .gyeongil-nav__school.girls{display:inline-flex;background:#fde5d9;color:#c23d12}
+    .gyeongil-nav__school img{width:16px;height:16px;border-radius:50%;background:#fff;margin-right:5px}
     @media(max-width:700px){.gyeongil-nav__brand{font-size:13px}.gyeongil-nav__meta .gyeongil-nav__date{display:none}.gyeongil-nav__inner{padding-inline:10px}}
     @media print{.gyeongil-nav{display:none!important}}
   `;
@@ -98,7 +118,9 @@
     const school = getSchool();
     const code = NAME_TO_CODE[school];
     badge.className = 'gyeongil-nav__school' + (code ? ' ' + code : '');
-    badge.textContent = school ? '🏫 ' + school : '';
+    badge.innerHTML = school
+      ? '<img src="' + IMG_BASE + 'logo-' + code + '.webp" alt="" onerror="this.hidden=true">' + school
+      : '';
   }
   paintBadge();
   // 다른 탭/앱에서 학교가 바뀌면 배지 동기화

@@ -15,10 +15,10 @@
   --green-dark: #0d4d3c;
   --blue: #185ca8;
   --gold: #b36b00;
-  --boys: #185ca8;       /* 창원경일고 */
-  --boys-soft: #dbeafe;
-  --girls: #c2185b;      /* 창원경일여고 */
-  --girls-soft: #fce7f3;
+  --boys: #128a43;       /* 창원경일고 — 교표 초록 */
+  --boys-soft: #d9f2e3;
+  --girls: #e8501e;      /* 창원경일여고 — 교표 오렌지레드 */
+  --girls-soft: #fde5d9;
   --g1: linear-gradient(135deg, #0ea5e9, #2563eb);   /* 1단계 */
   --g2: linear-gradient(135deg, #2563eb, #7c3aed);   /* 2단계 */
   --g3: linear-gradient(135deg, #7c3aed, #db2777);   /* 3단계 */
@@ -69,6 +69,7 @@ h3 { margin-bottom: 8px; font-size: 19px; }
 .school-picker > span { display: block; margin-bottom: 9px; font-size: 13px; font-weight: 800; }
 .segments { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .segments button {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 48px;
   padding: 8px 12px;
   border-radius: 10px;
@@ -82,11 +83,11 @@ h3 { margin-bottom: 8px; font-size: 19px; }
 .segments button[data-school="창원경일여고"] { border: 2px solid var(--girls-soft); color: var(--girls); }
 .segments button[data-school="창원경일고"].active {
   background: var(--boys); border-color: var(--boys); color: #fff;
-  box-shadow: 0 6px 16px rgba(24, 92, 168, .35);
+  box-shadow: 0 6px 16px rgba(18, 138, 67, .35);
 }
 .segments button[data-school="창원경일여고"].active {
   background: var(--girls); border-color: var(--girls); color: #fff;
-  box-shadow: 0 6px 16px rgba(194, 24, 91, .35);
+  box-shadow: 0 6px 16px rgba(232, 80, 30, .35);
 }
 #school-status { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
 #school-status.boys { color: var(--boys); font-weight: 700; }
@@ -189,3 +190,27 @@ footer {
   .intro { color: #333; }
   .steps li { break-inside: avoid; box-shadow: none; }
 }
+
+
+/* ── v3.3 교표 요소 ─────────────────────────────────────────── */
+.segments button img { width: 30px; height: 30px; border-radius: 50%; background: #fff; flex: 0 0 auto; }
+.segments button img[hidden] { display: none; }
+
+/* ② 교표 스탬프 애니메이션 */
+.stamp-overlay { position: fixed; inset: 0; z-index: 99998; display: grid; place-items: center;
+  background: rgba(255,255,255,.55); backdrop-filter: blur(2px); pointer-events: none;
+  opacity: 0; transition: opacity .25s; }
+.stamp-overlay.on { opacity: 1; }
+.stamp-overlay .stamp { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.stamp-overlay img { width: min(46vw, 220px); height: auto; filter: drop-shadow(0 12px 30px rgba(0,0,0,.25)); }
+.stamp-overlay .stamp-name { font-size: 20px; font-weight: 900; }
+.stamp-overlay.boys .stamp-name { color: var(--boys); }
+.stamp-overlay.girls .stamp-name { color: var(--girls); }
+.stamp-overlay.on .stamp { animation: stampIn .55s cubic-bezier(.2,1.4,.4,1); }
+@keyframes stampIn {
+  0% { transform: scale(2.2); opacity: 0; }
+  55% { transform: scale(.94); opacity: 1; }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .stamp-overlay.on .stamp { animation: none; } }
