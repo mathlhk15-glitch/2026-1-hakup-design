@@ -1,4 +1,4 @@
-# 경일 학업설계 플랫폼 v3.1
+# 경일 학업설계 플랫폼 v3.2
 
 창원경일고·창원경일여고 1학년의 선택과목 설계를 돕는 통합 웹 플랫폼.
 학생은 하나의 사이트처럼 사용하고, 관리자는 앱별로 독립 관리한다.
@@ -18,6 +18,7 @@
 ├─ index.html                  포털 홈 · 학교 선택(경일고=파랑, 경일여고=로즈)
 ├─ common/
 │  ├─ navigation.js            공통 내비게이션 + 학교 상태 API(GyeongilPortal)
+│  ├─ subject-images.js        과목명→안내서 이미지 공통 맵(choice ? 아이콘용)
 │  └─ portal.css               포털 스타일(밝은 테마 + 카드 UI)
 ├─ major/                      1단계 · 전공 탐색 사전 (19개 대학, index.html + data.js)
 ├─ subjects/                   2단계 · 학과·과목 설명 (index.html + assets/ 이미지 334개)

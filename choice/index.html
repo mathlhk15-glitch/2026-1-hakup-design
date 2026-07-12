@@ -792,7 +792,7 @@ function renderSchedule(){
                 onclick="toggleSubj('${g.code}','${esc(s)}',${lim})"
                 oncontextmenu="openPopup('${esc(s)}');return false"
                 title="${isSel?'선택됨 — 클릭하면 해제':'클릭하여 선택 (우클릭=과목 설명)'}"
-              ><span class="chk">✓</span>${s}</button>`;
+              ><span class="chk">✓</span>${s}<span class="qico" role="button" tabindex="0" aria-label="${esc(s)} 과목 설명 보기" title="과목 설명 보기" onclick="event.stopPropagation();openPopup('${esc(s)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.stopPropagation();event.preventDefault();openPopup('${esc(s)}')}">?</span></button>`;
             }).join('')}
           </div>
         </div>`;
@@ -1119,6 +1119,64 @@ function clearAll(){
   window.addEventListener('afterprint', function () {
     document.body.classList.remove('print-summary');
   });
+})();
+</script>
+
+<style>
+/* v3.2: 과목 설명 ? 아이콘 & 팝업 안내서 이미지 */
+.qico{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+  margin-left:6px;border-radius:50%;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.45);
+  font-size:11px;font-weight:800;line-height:1;cursor:help;flex:0 0 auto;transition:transform .12s,background .12s}
+.qico:hover{background:#fff;color:#1e3a5f;transform:scale(1.15)}
+.qico:focus-visible{outline:2px solid #e0a126;outline-offset:1px}
+.subj-btn.sel .qico{background:rgba(0,0,0,.18);border-color:rgba(255,255,255,.6)}
+#popImgWrap{margin-top:12px;border-top:1px solid rgba(148,163,184,.25);padding-top:10px}
+#popImgWrap .pi-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  font-size:11px;color:#94a3b8;margin-bottom:6px}
+#popImgWrap .pi-head a{color:#60a5fa;font-weight:700;text-decoration:none}
+#popImgWrap .pi-box{max-height:46vh;overflow:auto;border-radius:8px;border:1px solid rgba(148,163,184,.25)}
+#popImgWrap img{width:100%;display:block}
+@media print{.qico{display:none!important}}
+</style>
+
+<script src="../common/subject-images.js"></script>
+<script>
+/* v3.2: 과목 팝업에 '과목 이해'의 교육과정 안내서 이미지 결합 (openPopup 래핑) */
+(function () {
+  'use strict';
+  if (typeof openPopup !== 'function') return;
+  var orig = openPopup;
+
+  function ensureWrap() {
+    var w = document.getElementById('popImgWrap');
+    if (w) return w;
+    var tags = document.getElementById('popTags');
+    if (!tags || !tags.parentNode) return null;
+    w = document.createElement('div');
+    w.id = 'popImgWrap';
+    tags.parentNode.appendChild(w);
+    return w;
+  }
+
+  openPopup = function (name) {
+    orig(name);
+    var w = ensureWrap();
+    if (!w) return;
+    var src = window.GyeongilSubjectImages && window.GyeongilSubjectImages.find(name);
+    if (src) {
+      w.style.display = '';
+      w.innerHTML =
+        '<div class="pi-head"><span>📖 교육과정 안내서 (과목 이해와 동일 자료)</span>' +
+        '<a href="' + src + '" target="_blank" rel="noopener">크게 보기 ↗</a></div>' +
+        '<div class="pi-box"><img loading="lazy" decoding="async" src="' + src +
+        '" alt="' + name.replace(/"/g, '&quot;') + ' 과목 설명 안내서"></div>';
+    } else {
+      w.style.display = '';
+      w.innerHTML =
+        '<div class="pi-head"><span>이 과목의 안내서 이미지가 없습니다.</span>' +
+        '<a href="../subjects/index.html" target="_blank" rel="noopener">2단계 과목 이해에서 찾기 ↗</a></div>';
+    }
+  };
 })();
 </script>
 </body>
