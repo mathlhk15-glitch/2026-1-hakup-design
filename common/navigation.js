@@ -76,7 +76,8 @@
     ['home', '처음으로', root + 'index.html'],
     ['major', '1 전공 탐색', root + 'major/index.html'],
     ['subjects', '2 과목 이해', root + 'subjects/index.html'],
-    ['choice', '3 과목 선택', root + 'choice/index.html'],
+    ['univ-subjects', '3 대학 권장과목', root + 'univ-subjects/index.html'],
+    ['choice', '4 과목 선택', root + 'choice/index.html'],
     ['roadmap', '대입 로드맵', root + 'roadmap/index.html']
   ];
 

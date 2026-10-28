@@ -219,8 +219,8 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 /* ─── SCHOOL SELECT BAR ─── */
 .school-bar{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);padding:16px 20px;display:flex;align-items:center;gap:16px;border-bottom:2px solid rgba(255,255,255,.06);flex-wrap:wrap}
 .school-bar label{font-size:.85rem;color:#94a3b8;white-space:nowrap;font-weight:700;letter-spacing:-.01em}
-.school-btns{display:flex;gap:10px;flex-wrap:wrap}
-.school-btn{display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e2e8f0;cursor:pointer;font-family:inherit;transition:all .2s;min-width:180px}
+.school-btns{overflow-x:auto;max-width:100%;display:flex;gap:10px;flex-wrap:wrap}
+.school-btn{white-space:nowrap;word-break:keep-all;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e2e8f0;cursor:pointer;font-family:inherit;transition:all .2s;min-width:180px}
 .school-btn:hover{border-color:#60a5fa;background:rgba(96,165,250,.15)}
 .school-btn.active{border-color:#60a5fa;background:rgba(96,165,250,.2);box-shadow:0 0 0 3px rgba(96,165,250,.2)}
 .school-icon{font-size:1.3rem;flex-shrink:0}
@@ -241,7 +241,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 .sel.g-C{background:#c7d2fe;border-color:#4f46e5;color:#3730a3;font-weight:700}
 </style>
 <style>.univ-rec-shortcut{padding:13px 17px;background:#ecf6ff;color:#16375a;border-bottom:1px solid #afcdea;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.univ-rec-shortcut strong{display:block;font-size:15px}.univ-rec-shortcut small{display:block;margin-top:4px;font-size:12px;color:#415a70}.univ-rec-shortcut a{display:inline-flex;align-items:center;justify-content:center;background:#1457aa;color:white;text-decoration:none;padding:12px 15px;min-height:48px;border-radius:11px;font-weight:800;font-size:14px}@media(max-width:680px){.univ-rec-shortcut{padding:12px}.univ-rec-shortcut a{width:100%}}</style></head>
-<body><div class="univ-rec-shortcut"><div><strong>🎓 대학별 권장과목도 확인하세요</strong><small>2028 대입 기준 · 대학/학과별 자료 검색 · 2026 입학생은 참고용</small></div><a href="../univ-subjects/index.html" id="univRecLink">2028 대학 권장과목 찾기 →</a></div>
+<body><div class="univ-rec-shortcut"><div><strong>🎓 대학별 권장과목도 확인하세요</strong><small>2028 대입 기준 · 대학/학과별 자료 검색 · 2026 입학생은 참고용</small></div><a href="../univ-subjects/index.html" target="_blank" rel="noopener" id="univRecLink">2028 대학 권장과목 찾기 ↗ (새 탭)</a></div>
 <script src="../common/navigation.js"></script>
 
 <!-- ═══ HEADER ═══ -->

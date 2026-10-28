@@ -103,7 +103,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 46px 24px 44px; }
 /* ── 단계 카드 (d의 카드 UI: 그라디언트 번호 + 호버 + CTA) ──── */
 .steps {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0,1fr));
   gap: 16px;
   margin: 0; padding: 0; list-style: none;
 }
