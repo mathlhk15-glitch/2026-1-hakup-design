@@ -214,3 +214,17 @@ footer {
   100% { transform: scale(1); }
 }
 @media (prefers-reduced-motion: reduce) { .stamp-overlay.on .stamp { animation: none; } }
+
+/* 2028 권장과목 검색 메뉴 추가: 단계별 색상과 모바일 가독성 */
+.steps li:nth-child(1){--step-accent:#18784c}
+.steps li:nth-child(2){--step-accent:#225ac9}
+.steps li:nth-child(3){--step-accent:#ad6213}
+.steps li:nth-child(4){--step-accent:#7045ac}
+.steps li{border-top:5px solid var(--step-accent,#2563eb);word-break:keep-all;overflow-wrap:break-word}
+.steps li .step-number{background:var(--step-accent,#2563eb);color:white}
+.steps li .step-label{color:var(--step-accent,#2563eb);font-weight:800}
+.steps li .step-body>a{background:var(--step-accent,#2563eb);color:white;min-height:50px;display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:12px;font-weight:800;text-decoration:none;text-align:center}
+.steps li:nth-child(3) .step-body>a{background:#95500b}
+.year-note{max-width:1120px;margin:20px auto;padding:16px 20px;background:#fff6df;border:1px solid #e5b253;border-radius:15px;color:#633e14;line-height:1.65}
+.year-note p{margin:6px 0 0}.year-note strong{font-size:17px}
+@media(max-width:700px){.portal-header{padding:24px 16px 22px;gap:18px;grid-template-columns:minmax(0,1fr)}.portal-header h1{font-size:30px}.steps{grid-template-columns:minmax(0,1fr)!important}.steps li{min-width:0;padding:18px!important}.steps li .step-body>a{width:100%;font-size:16px}.year-note{margin:16px 12px;padding:14px;font-size:14px}.intro{font-size:15px}.school-picker .segments button{min-height:48px}}
