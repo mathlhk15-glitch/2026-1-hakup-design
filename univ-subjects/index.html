@@ -132,7 +132,10 @@ for (const button of document.querySelectorAll('.guide-tab')) {
   const p=new URLSearchParams(location.search);
   const unis=[...new Set(DATA.map(x=>x.university))];
   const uq=p.get('uni')||''; const q=p.get('q')||'';
-  const normalizedUni = unis.find(u => norm(u)===norm(uq)) || unis.find(u => norm(u.replace(/대학교$/, '대').replace(/여자대학교$/, '여대'))===norm(uq)) || '';
+  const UNIVERSITY_ALIASES = {'숙명여대':'숙명여자대학교','서울과기대':'서울과학기술대학교','광주교대':'광주교육대학교','서울대':'서울대학교','부산대':'부산대학교','경북대':'경북대학교','전남대':'전남대학교','고려대':'고려대학교','건국대':'건국대학교'};
+  const cleanUni = value => norm(String(value||'').replace(/\([^)]*\)/g,'').replace(/\s+/g,''));
+  const canonicalUni = UNIVERSITY_ALIASES[cleanUni(uq)] || uq;
+  const normalizedUni = unis.find(u=>cleanUni(u)===cleanUni(canonicalUni)) || unis.find(u=>cleanUni(u.replace(/여자대학교$/,'여대').replace(/대학교$/,'대'))===cleanUni(canonicalUni)) || '';
   if(normalizedUni){state.uni=normalizedUni;document.getElementById('uni').value=normalizedUni;updateDept();}
   if(q){state.q=q.slice(0,80);document.getElementById('q').value=state.q;}
   if(q||state.uni)render();

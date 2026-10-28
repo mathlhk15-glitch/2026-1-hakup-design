@@ -231,7 +231,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 /* hide main app until school selected */
 #mainApp{display:none}
 #schoolNotice{display:flex;align-items:center;justify-content:center;min-height:200px;color:#94a3b8;font-size:.9rem;flex-direction:column;gap:8px;padding:40px}
-@media(max-width:640px){.school-bar{flex-direction:column;align-items:flex-start}.school-btns{width:100%}.school-btn{flex:1;min-width:140px}}
+@media(max-width:640px){.school-bar{flex-direction:column;align-items:stretch}.school-btns{width:100%;display:grid;grid-template-columns:minmax(0,1fr);overflow:visible}.school-btn{width:100%;min-width:0;max-width:100%;box-sizing:border-box;flex-shrink:1;white-space:normal;text-align:left}.school-name,.school-desc{overflow-wrap:break-word;word-break:keep-all}}
 
 
 /* ─── GIRLS 추가 군 색상 (G군: 청록, C군: 인디고) ─── */

@@ -124,6 +124,15 @@
       : '';
   }
   paintBadge();
+  // 작은 화면에서 현재 단계가 가려지지 않도록 해당 메뉴를 화면 안으로 이동
+  const activeLink = nav.querySelector('a[aria-current="page"]');
+  if (activeLink) requestAnimationFrame(function () {
+    const viewport = nav.querySelector('.gyeongil-nav__inner');
+    if (viewport && viewport.scrollWidth > viewport.clientWidth) {
+      const left = activeLink.offsetLeft - viewport.offsetLeft - 32;
+      viewport.scrollTo({left:Math.max(0,left),behavior:'instant'});
+    }
+  });
   // 다른 탭/앱에서 학교가 바뀌면 배지 동기화
   window.addEventListener('storage', function (e) { if (e.key === KEY) paintBadge(); });
 })();
