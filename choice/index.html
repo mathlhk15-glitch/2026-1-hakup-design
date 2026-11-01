@@ -242,7 +242,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 </style>
 <style>.univ-rec-shortcut{padding:13px 17px;background:#ecf6ff;color:#16375a;border-bottom:1px solid #afcdea;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.univ-rec-shortcut strong{display:block;font-size:15px}.univ-rec-shortcut small{display:block;margin-top:4px;font-size:12px;color:#415a70}.univ-rec-shortcut a{display:inline-flex;align-items:center;justify-content:center;background:#1457aa;color:white;text-decoration:none;padding:12px 15px;min-height:48px;border-radius:11px;font-weight:800;font-size:14px}@media(max-width:680px){.univ-rec-shortcut{padding:12px}.univ-rec-shortcut a{width:100%}}</style></head>
 <body><div class="univ-rec-shortcut"><div><strong>🎓 대학별 권장과목도 확인하세요</strong><small>2028 대입 기준 · 대학/학과별 자료 검색 · 2026 입학생은 참고용</small></div><a href="../univ-subjects/index.html" target="_blank" rel="noopener" id="univRecLink">2028 대학 권장과목 찾기 ↗ (새 탭)</a></div>
-<script src="../common/navigation.js"></script>
+<script src="../common/navigation.js"></script><script src="../common/curriculum-gyeongil.js"></script>
 
 <!-- ═══ HEADER ═══ -->
 <div class="hdr">
@@ -269,6 +269,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 </div>
 
 <!-- ═══ SCHOOL SELECT BAR ═══ -->
+<div id="entryYearWrap" style="padding:12px 20px;background:#eaf3ff;color:#153c65;font-weight:700;display:flex;flex-wrap:wrap;align-items:center;gap:10px"><label for="entryYear">입학 연도 (올해 1학년 / 내년 신입생)</label><select id="entryYear" style="font-size:16px;padding:8px 12px;border:1px solid #93b6e6;border-radius:8px"><option value="2026">2026학년도 입학생 · 2029 대입</option><option value="2027">2027학년도 입학생 · 2030 대입</option></select><span style="font-size:12px;font-weight:400">2028 대학 권장과목은 참고자료입니다. 선택군 과목은 개설 확정이 아닙니다.</span></div>
 <div class="school-bar" id="schoolBar">
   <label>🏫 학교 선택</label>
   <div class="school-btns">
@@ -446,66 +447,22 @@ const GRP_LABEL_GIRLS = {
 };
 
 // ── 창원경일고 편제표 (원본) ──
-const SEMESTERS_BOYS = [
-  {code:"1-1",label:"1학년 1학기",cls:"hdr-11",
-   fixed:["공통국어1","공통수학1","공통영어1","한국사1","통합사회1","통합과학1","과학탐구실험1","체육1","미술(교차)"],groups:[]},
-  {code:"1-2",label:"1학년 2학기",cls:"hdr-12",
-   fixed:["공통국어2","공통수학2","공통영어2","한국사2","통합사회2","통합과학2","과학탐구실험2","체육2","음악(교차)"],groups:[]},
-  {code:"2-1",label:"2학년 1학기",cls:"hdr-21",
-   fixed:["문학","대수","영어Ⅰ","스포츠 생활1"],
-   groups:[
-     {code:"A",label:"국·영·수 계열 [택1]",limit:1,
-      subs:["주제 탐구 독서","문학과 영상","영미 문학 읽기","인공지능 수학","실용 통계"]},
-     {code:"B",label:"사회·과학 탐구 [택3]",limit:3,
-      subs:["세계시민과 지리","세계사","현대사회와 윤리","사회와 문화","법과 사회","물리학","화학","생명과학","지구과학"]}
-   ]},
-  {code:"2-2",label:"2학년 2학기",cls:"hdr-22",
-   fixed:["화법과 언어","미적분Ⅰ","영어Ⅱ","스포츠 생활2"],
-   groups:[
-     {code:"D",label:"국·영·수 계열 [택1]",limit:1,
-      subs:["독서 토론과 글쓰기","영어 발표와 토론","기하"]},
-     {code:"E",label:"사회·과학 탐구 [택3]",limit:3,
-      subs:["도시의 미래 탐구","동아시아 역사 기행","윤리와 사상","정치","경제","역학과 에너지","물질과 에너지","세포와 물질대사","지구시스템과학"]},
-     {code:"F",label:"기술·가정·정보·제2외국어 [택1]",limit:1,
-      subs:["로봇과 공학세계","인공지능 기초","일본 문화","중국 문화"]},
-     {code:"G",label:"제2외국어 [택1]",limit:1,
-      subs:["일본어","중국어"]}
-   ]},
-  {code:"3-1",label:"3학년 1학기",cls:"hdr-31",
-   fixed:["독서와 작문","확률과 통계","심화 영어Ⅰ"],
-   groups:[
-     {code:"H",label:"국·영·수 계열 [택1]",limit:1,
-      subs:["언어생활 탐구","심화 영어 독해와 작문","경제 수학","미적분Ⅱ"]},
-     {code:"I",label:"사회·과학 탐구 [택3]",limit:3,
-      subs:["한국지리 탐구","금융과 경제생활","사회문제 탐구","전자기와 양자","화학 반응의 세계","생물의 유전","행성우주과학","물리학 실험","화학 실험","생명과학 실험"]},
-     {code:"K",label:"교양 [택1]",limit:1,
-      subs:["생태와 환경","인간과 심리"]}
-   ]},
-  {code:"3-2",label:"3학년 2학기",cls:"hdr-32",
-   fixed:["독서 토론과 글쓰기","실용 통계","심화 영어Ⅱ"],
-   groups:[
-     {code:"L",label:"국·영·수 계열 [택1]",limit:1,
-      subs:["매체 의사소통","미디어 영어","고급 미적분"]},
-     {code:"M",label:"사회·과학 탐구 [택2]",limit:2,
-      subs:["여행지리","윤리문제 탐구","역사로 탐구하는 현대 세계","융합과학 탐구","과학의 역사와 문화","기후변화와 환경생태"]}
-   ]}
-];
-
-const GRP_LIMITS_BOYS = {"A":1,"B":3,"G":1,"D":1,"E":3,"F":1,"H":1,"I":3,"K":1,"L":1,"M":2};
-const GRP_LABEL_BOYS = {
-  "A":"2학년 1학기 — 국·영·수 계열 (1개 선택)",
-  "B":"2학년 1학기 — 사회·과학 탐구 (3개 선택)",
-  "D":"2학년 2학기 — 국·영·수 계열 (1개 선택)",
-  "E":"2학년 2학기 — 사회·과학 탐구 (3개 선택)",
-  "G":"2학년 2학기 — 제2외국어 (1개 선택)",
-  "F":"2학년 2학기 — 기술·정보·제2외국어 (1개 선택)",
-  "H":"3학년 1학기 — 국·영·수 계열 (1개 선택)",
-  "I":"3학년 1학기 — 사회·과학 탐구 (3개 선택)",
-  "K":"3학년 1학기 — 교양 (1개 선택)",
-  "L":"3학년 2학기 — 국·영·수 계열 (1개 선택)",
-  "M":"3학년 2학기 — 사회·과학 탐구 (2개 선택)"
-};
-
+// Boys 2026/2027 schedules are generated from one common curriculum file.
+function boysSchedule(year){
+ const data=(window.GYEONGIL_CURRICULUM||{})[year]||[];
+ const keys=['1학년 1학기','1학년 2학기','2학년 1학기','2학년 2학기','3학년 1학기','3학년 2학기'];
+ const codes=['1-1','1-2','2-1','2-2','3-1','3-2'];
+ const grpTerms=year==='2027'?{A:2,B:2,C:2,D:2,E:3,F:3,G:3,H:4,I:4,J:4,K:4,L:5,M:5}:{A:2,B:2,C:2,D:3,E:3,F:3,G:3,H:4,I:4,J:4,K:4,L:5,M:5};
+ const limits=year==='2027'?{A:1,B:3,C:1,D:1,E:1,F:3,G:1,H:1,I:3,J:1,K:1,L:1,M:2}:{A:1,B:3,C:1,D:1,E:3,F:1,G:1,H:1,I:3,J:1,K:1,L:1,M:2};
+ return {limits,terms:keys.map((term,i)=>({code:codes[i],label:term,cls:'hdr-'+codes[i].replace('-',''),
+  fixed:data.filter(x=>x.group==='학교 지정'&&x.term.includes(term)&&!(year==='2027'&&['음악','미술'].includes(x.name))).map(x=>x.name).concat(year==='2027'&&[0,2].includes(i)?['음악·미술 교차 이수(실제 배정 확인)']:[]),
+  groups:Object.entries(grpTerms).filter(([g,idx])=>idx===i).map(([g])=>({code:g,label:'선택군 '+g+' [택'+limits[g]+']',limit:limits[g],subs:data.filter(x=>x.group==='선택군'+g).map(x=>x.name)}))}))};
+}
+let SEMESTERS_BOYS=[];
+let GRP_LIMITS_BOYS={};
+let GRP_LABEL_BOYS={};
+function refreshBoys(year){const result=boysSchedule(year);SEMESTERS_BOYS=result.terms;GRP_LIMITS_BOYS=result.limits;GRP_LABEL_BOYS=Object.fromEntries(result.terms.flatMap(t=>t.groups.map(g=>[g.code,t.label+' — '+g.label])));}
+refreshBoys('2026');
 // Active references (will be set by selectSchool)
 let SEMESTERS = [];
 let GRP_LIMITS = {};
@@ -518,6 +475,16 @@ function selectSchool(school) {
   document.getElementById('btnGirls').classList.toggle('active', school === 'girls');
   document.getElementById('btnBoys').classList.toggle('active', school === 'boys');
   
+  // Entry year is shared across the portal and the university guide.
+  const chosenYear=document.getElementById('entryYear').value;
+  try{localStorage.setItem('gyeongil.entryYear',chosenYear)}catch(e){}
+  if(school==='girls'&&chosenYear==='2027'){
+    document.getElementById('schoolNotice').style.display='flex';
+    document.getElementById('schoolNotice').innerHTML='<div><b>경일여고 2027학년도 입학생 편제표가 제공되지 않았습니다.</b><p>다른 학년도 과목을 임의로 적용하지 않습니다. 교육과정부의 확정 편제표를 확인해 주세요.</p></div>';
+    document.getElementById('mainApp').style.display='none';
+    return;
+  }
+  if(school==='boys') refreshBoys(chosenYear);
   // Set active data
   if (school === 'girls') {
     SEMESTERS = SEMESTERS_GIRLS;
@@ -529,7 +496,7 @@ function selectSchool(school) {
     SEMESTERS = SEMESTERS_BOYS;
     GRP_LIMITS = GRP_LIMITS_BOYS;
     GRP_LABEL = GRP_LABEL_BOYS;
-    document.getElementById('schoolSubTitle').textContent = '창원경일고 — 2026학년도 입학생 기준 대교협 2028 반영과목 연계';
+    document.getElementById('schoolSubTitle').textContent = '창원경일고 — '+chosenYear+'학년도 입학생 편제표 · 대학 2028 자료는 참고용';
     document.querySelector('.hdr h1').textContent = '📚 창원경일고 선택과목 설계 도우미';
   }
   
@@ -553,6 +520,8 @@ function selectSchool(school) {
   updateSidebar();
 }
 
+document.getElementById('entryYear').value=(function(){try{return localStorage.getItem('gyeongil.entryYear')==='2027'?'2027':'2026'}catch(e){return '2026'}})();
+document.getElementById('entryYear').addEventListener('change',function(){if(currentSchool)selectSchool(currentSchool)});
 // 진로 미정 가상 카드
 const UNDECIDED_CARDS={
   "_undecided":{
