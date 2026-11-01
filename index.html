@@ -90,7 +90,7 @@
       <a href="roadmap/index.html">로드맵 활동 시작 →</a>
     </section>
 
-    <section class="year-note" aria-label="학년도 주의"><strong>📌 학년별 자료가 달라요</strong><p>학교 선택과목 설계는 2026학년도 입학생 편제표를 사용합니다. 새 3단계의 대학별 권장과목 자료는 2028학년도 대학입학 기준으로, 2026년 입학생(2029 대입 예정)에게 그대로 적용할 수 없습니다. 반드시 해당 학생의 입학연도와 대학 공식 자료를 확인하세요.</p></section>
+    <section class="year-note" aria-label="학년도 주의"><strong>📌 학년별 자료가 달라요</strong><p>학교 선택과목 설계는 입학년도에 따라 경일고 2026 또는 2027 편제표를 적용합니다. 새 3단계의 대학별 권장과목 자료는 2028학년도 대학입학 기준으로, 2026년 입학생(2029 대입 예정)에게 그대로 적용할 수 없습니다. 반드시 해당 학생의 입학연도와 대학 공식 자료를 확인하세요.</p></section>
     <section class="notice" aria-label="이용 안내">
       <h2>결과는 꼭 따로 남겨주세요</h2>
       <p>학교 선택은 현재 브라우저에만 기억됩니다. 다른 기기에서는 이어지지 않으므로 최종 선택 결과는 인쇄하거나 상담용 요약으로 보관하세요. 이름·학번 등 개인정보는 저장하지 않습니다.</p>
@@ -98,7 +98,7 @@
   </main>
 
   <footer>
-    <span>자료 기준: 2026학년도 입학생 · 플랫폼 v3.6 · 2026.10</span>
+    <span>자료 기준: 경일고 2026·2027 입학생 · 플랫폼 v3.7.1 · 2026.11</span>
     <span>기획·구성: 창원경일고 진로진학상담교사 이현규</span>
     <span>학과·과목 설명 원자료: 전남여고 진로진학상담교사 김동석 선생님 제작 자료를 재구성</span>
   </footer>
@@ -148,6 +148,10 @@
         paint(button.dataset.school);
         showStamp(button.dataset.school);
       }));
+      const yearSelect=document.getElementById('portalEntryYear');
+      const savedYear=(()=>{try{return localStorage.getItem('gyeongil.entryYear')}catch(e){return null}})();
+      yearSelect.value=['2026','2027'].includes(savedYear)?savedYear:'2026';
+      yearSelect.addEventListener('change',()=>{try{localStorage.setItem('gyeongil.entryYear',yearSelect.value)}catch(e){console.warn('입학년도 저장 실패',e)}});
       paint(window.GyeongilPortal.getSchool());
     })();
   </script>

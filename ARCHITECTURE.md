@@ -85,3 +85,8 @@ base64 내장 → 외부 파일 분리(v3) → webp 전환(v3.1). JS 맵 3종이
 □ 모든 상대경로 정상(빌드 스크립트 검증) □ 새로고침 후 학교 선택 유지
 □ 뒤로가기 정상 □ 모바일 Safari/Chrome 실기기 확인 □ DevTools Console 무경고
 □ teacher/ 제외 업로드 □ 인쇄 A4 1장 확인(choice 상담 요약)
+
+
+### 입학년도 상태 키 (v3.7.1)
+- `gyeongil.entryYear`: `2026` 또는 `2027` 문자열. 포털/choice/univ-subjects 공통 사용.
+- `common/curriculum-gyeongil.js`: 입학연도별 편제 공통 데이터. 다른 페이지에 별도로 복사 금지.
